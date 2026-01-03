@@ -54,7 +54,7 @@ const Home = () => {
                     <div className="hero-content" data-aos="fade-up">
                         <h1 className="mb-3">
                             Engineer the <span className="typed-text"></span><span className="cursor">&nbsp;</span><br />
-                            With PcCharm™
+                            With <img src="/icon.png" alt="PcCharm" style={{ width: '50px', height: '50px', verticalAlign: 'middle', marginRight: '10px' }} />PcCharm™
                         </h1>
                         <p className="lead mb-4">
                             The integrated platform transforming potential into proven tech innovators through

@@ -124,6 +124,7 @@ const Academy = () => {
                 <div className="container">
                     <div className="hero-content" data-aos="fade-up">
                         <h1>
+                            <img src="/icon.png" alt="PcCharm" style={{ width: '60px', height: '60px', verticalAlign: 'middle', marginRight: '15px' }} />
                             PcCharm™ <span style={{ opacity: 0.7, fontWeight: 400 }}>Academy</span>
                         </h1>
                         <p>Master in-demand tech skills through hands-on projects, expert mentorship, and a vibrant community.</p>
