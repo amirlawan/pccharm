@@ -4,6 +4,7 @@
     --secondary-dark-blue: #04102d;
     /* Slightly darker shade for bg variation */
     --teal-accent: #38f9d7;
+    --teal-accent-rgb: 56, 249, 215;
     --purple-accent: #764ba2;
     --yellow-accent: #ffda63;
     --light-text: #f0f0f0;
@@ -97,9 +98,20 @@ p.lead {
 }
 
 @keyframes pulse {
-    0% { transform: scale(0.95); opacity: 0.8; }
-    50% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(0.95); opacity: 0.8; }
+    0% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
 }
 
 .loader {
@@ -546,7 +558,7 @@ section {
     background: var(--primary-blue);
     border-radius: 12px;
     padding: 2.5rem;
-    border: 1px solid rgba(var(--teal-accent), 0.2);
+    border: 1px solid rgba(var(--teal-accent-rgb), 0.2);
     height: 100%;
     transition: all 0.3s ease;
 }
@@ -560,7 +572,7 @@ section {
 .solution-card .icon-bg {
     width: 60px;
     height: 60px;
-    background-color: rgba(var(--teal-accent), 0.1);
+    background-color: rgba(var(--teal-accent-rgb), 0.1);
     border-radius: 8px;
     display: flex;
     align-items: center;
@@ -693,7 +705,7 @@ section {
     transform: scale(1.15) translateY(-5px);
     border-color: var(--teal-accent);
     z-index: 10;
-    box-shadow: 0 5px 15px rgba(var(--teal-accent), 0.4);
+    box-shadow: 0 5px 15px rgba(var(--teal-accent-rgb), 0.4);
 }
 
 /* --- Testimonials (Keep improvements) --- */
@@ -724,7 +736,7 @@ section {
 .testimonial-card:hover .testimonial-avatar {
     transform: scale(1.1);
     border-color: var(--teal-accent);
-    box-shadow: 0 0 25px rgba(var(--teal-accent), 0.5);
+    box-shadow: 0 0 25px rgba(var(--teal-accent-rgb), 0.5);
 }
 
 .testimonial-text {
@@ -1103,7 +1115,7 @@ footer::before {
 #course-catalog-controls .form-select:focus {
     background-color: rgba(255, 255, 255, 0.15);
     border-color: var(--teal-accent);
-    box-shadow: 0 0 0 2px rgba(var(--teal-accent), 0.3);
+    box-shadow: 0 0 0 2px rgba(var(--teal-accent-rgb), 0.3);
     color: var(--light-text);
 }
 
