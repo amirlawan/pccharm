@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children }) => {
     }, []);
 
     if (loading) {
-        return <div id="preloader"><div className="loader"></div></div>;
+        return <div id="preloader"><img src="/icon.png" alt="PcCharm Logo" className="preloader-logo" /><div className="loader"></div></div>;
     }
 
     if (!user) {
