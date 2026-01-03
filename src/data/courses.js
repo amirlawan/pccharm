@@ -1,0 +1,217 @@
+export const coursesData = [
+    // Programming & Web Development
+    {
+        id: 'html',
+        title: 'HTML',
+        description: 'Master the foundational language for creating web pages and structuring content.',
+        icon: 'fab fa-html5',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'css',
+        title: 'CSS',
+        description: 'Learn to style web pages, control layouts, and create visually appealing designs.',
+        icon: 'fab fa-css3-alt',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'js',
+        title: 'JavaScript',
+        description: 'Add interactivity, dynamic content, and complex features to your websites.',
+        icon: 'fab fa-js-square',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'bootstrap',
+        title: 'Bootstrap',
+        description: 'Utilize this popular framework for building responsive, mobile-first websites quickly.',
+        icon: 'fab fa-bootstrap',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'react',
+        title: 'React',
+        description: 'Build powerful, interactive user interfaces with this leading JavaScript library.',
+        icon: 'fab fa-react',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'php',
+        title: 'PHP',
+        description: 'Learn server-side scripting for web development, database interaction, and more.',
+        icon: 'fab fa-php',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'csharp',
+        title: 'C#',
+        description: 'Explore object-oriented programming with C# for web, desktop, and game development.',
+        icon: 'fas fa-hashtag',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'java',
+        title: 'JAVA',
+        description: 'Master versatile, object-oriented Java for enterprise applications, Android dev, and more.',
+        icon: 'fab fa-java',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'python',
+        title: 'Python',
+        description: 'Learn the highly popular language for web dev, data science, AI, automation, and more.',
+        icon: 'fab fa-python',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+    {
+        id: 'c',
+        title: 'C Programming',
+        description: 'Understand fundamental programming concepts with the powerful C language.',
+        icon: 'fas fa-file-code',
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
+    },
+
+    // Data Management
+    {
+        id: 'sql',
+        title: 'SQL',
+        description: 'Learn to manage and query relational databases effectively using Structured Query Language.',
+        icon: 'fas fa-database',
+        category: 'data-management',
+        categoryLabel: 'Data Management'
+    },
+
+    // OS & Networking
+    {
+        id: 'linux',
+        title: 'Linux Basics',
+        description: 'Get comfortable with the Linux command line, file system, and essential utilities.',
+        icon: 'fab fa-linux',
+        category: 'os-networking',
+        categoryLabel: 'OS & Networking'
+    },
+    {
+        id: 'networking',
+        title: 'Networking Fundamentals',
+        description: 'Understand core networking concepts, protocols (TCP/IP), and network architecture.',
+        icon: 'fas fa-network-wired',
+        category: 'os-networking',
+        categoryLabel: 'OS & Networking'
+    },
+
+    // Cybersecurity
+    {
+        id: 'pentesting',
+        title: 'Penetration Testing',
+        description: 'Learn techniques to simulate attacks, identify vulnerabilities, and secure systems.',
+        icon: 'fas fa-user-secret',
+        category: 'cybersecurity',
+        categoryLabel: 'Cybersecurity & Ethical Hacking'
+    },
+    {
+        id: 'ethical-hacking',
+        title: 'Ethical Hacking Essentials',
+        description: 'Explore hacking methodologies and tools from an ethical perspective.',
+        icon: 'fas fa-mask',
+        category: 'cybersecurity',
+        categoryLabel: 'Cybersecurity & Ethical Hacking'
+    },
+    {
+        id: 'network-security',
+        title: 'Network Security',
+        description: 'Understand firewalls, VPNs, intrusion detection, and securing network infrastructure.',
+        icon: 'fas fa-shield-virus',
+        category: 'cybersecurity',
+        categoryLabel: 'Cybersecurity & Ethical Hacking'
+    },
+
+    // Emerging & Specialized
+    {
+        id: 'chatgpt',
+        title: 'Introduction to ChatGPT',
+        description: 'Explore the capabilities and applications of large language models like ChatGPT.',
+        icon: 'fas fa-comments',
+        category: 'emerging-specialized',
+        categoryLabel: 'Emerging & Specialized',
+        badge: 'New'
+    },
+    {
+        id: 'data-science',
+        title: 'Data Science Fundamentals',
+        description: 'Learn the basics of data analysis, visualization, and machine learning concepts.',
+        icon: 'fas fa-chart-line',
+        category: 'emerging-specialized',
+        categoryLabel: 'Emerging & Specialized',
+        badge: 'New'
+    },
+    {
+        id: 'career-roadmap',
+        title: 'Career Roadmap Planning',
+        description: 'Develop strategies for navigating the tech job market and planning your career path.',
+        icon: 'fas fa-map-signs',
+        category: 'emerging-specialized',
+        categoryLabel: 'Emerging & Specialized',
+        badge: 'New'
+    },
+    {
+        id: 'ai-intro',
+        title: 'Introduction to AI',
+        description: 'Grasp the fundamental concepts and history behind Artificial Intelligence.',
+        icon: 'fas fa-robot',
+        category: 'emerging-specialized',
+        categoryLabel: 'Emerging & Specialized'
+    },
+
+    // Other & Upcoming
+    {
+        id: 'git',
+        title: 'Version Control (Git & GitHub)',
+        description: 'Learn essential Git commands and collaboration workflows using GitHub.',
+        icon: 'fab fa-git-alt',
+        category: 'other-upcoming',
+        categoryLabel: 'Other & Upcoming'
+    },
+    {
+        id: 'cloud',
+        title: 'Cloud Computing Basics',
+        description: 'Introduction to core cloud concepts using platforms like AWS or Azure.',
+        icon: 'fas fa-cloud',
+        category: 'other-upcoming',
+        categoryLabel: 'Other & Upcoming'
+    },
+    {
+        id: 'agile',
+        title: 'Agile & Scrum Fundamentals',
+        description: 'Understand agile principles and the Scrum framework for project management.',
+        icon: 'fas fa-sync-alt',
+        category: 'other-upcoming',
+        categoryLabel: 'Other & Upcoming'
+    },
+    {
+        id: 'technical-writing',
+        title: 'Technical Writing',
+        description: 'Learn to write clear and concise documentation for technical audiences.',
+        icon: 'fas fa-pencil-alt',
+        category: 'other-upcoming',
+        categoryLabel: 'Other & Upcoming'
+    },
+    {
+        id: 'more',
+        title: 'More Coming Soon...',
+        description: "We're constantly developing new courses to keep you ahead of the curve.",
+        icon: 'fas fa-hourglass-half',
+        category: 'other-upcoming',
+        categoryLabel: 'Other & Upcoming',
+        isPlaceholder: true
+    }
+];
