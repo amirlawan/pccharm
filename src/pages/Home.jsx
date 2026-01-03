@@ -193,8 +193,8 @@ const Home = () => {
                 <div className="container">
                     <h5 data-aos="fade-up" className="text-center">Trusted By Leading Innovators & Educators</h5>
                     <div className="partner-logos" data-aos="fade-up" data-aos-delay="100">
-                        <div className="partner-logo"><img src="/icon.png" alt="Partner Logo 1" style={{ height: '40px' }} /></div>
-                        <div className="partner-logo"><img src="https://via.placeholder.com/150x45/ffffff/a8b2d1?text=Partner+2" alt="Partner Logo 2" /></div>
+                        <div className="partner-logo"><img src="/icon.png" alt="pccharm" style={{ height: '40px' }} /></div>
+                        <div className="partner-logo"><img src="/scda.png" alt="SCDA" style={{ height: '40px' }} /></div>
                         <div className="partner-logo"><img src="https://via.placeholder.com/150x45/ffffff/a8b2d1?text=Partner+3" alt="Partner Logo 3" /></div>
                         <div className="partner-logo"><img src="https://via.placeholder.com/150x45/ffffff/a8b2d1?text=Partner+4" alt="Partner Logo 4" /></div>
                         <div className="partner-logo"><img src="https://via.placeholder.com/150x45/ffffff/a8b2d1?text=Partner+5" alt="Partner Logo 5" /></div>
