@@ -63,6 +63,7 @@ const CourseViewer = () => {
     const [user, setUser] = useState(null);
     const [course, setCourse] = useState(null);
     const [lessons, setLessons] = useState([]);
+    const [quizzes, setQuizzes] = useState([]);
     const [activeLesson, setActiveLesson] = useState(null);
     const [quizQuestions, setQuizQuestions] = useState([]);
     const [completedLessons, setCompletedLessons] = useState([]);
@@ -79,6 +80,7 @@ const CourseViewer = () => {
                 const { data: { user: currentUser } } = await supabase.auth.getUser();
                 setUser(currentUser);
 
+                // Fetch Course Info
                 const { data: courseData, error: courseError } = await supabase
                     .from('courses')
                     .select('*')
@@ -88,6 +90,7 @@ const CourseViewer = () => {
                 if (courseError) throw courseError;
                 setCourse(courseData);
 
+                // Fetch Lessons
                 const { data: lessonsData, error: lessonsError } = await supabase
                     .from('lessons')
                     .select('*')
@@ -97,15 +100,28 @@ const CourseViewer = () => {
                 if (lessonsError) throw lessonsError;
                 setLessons(lessonsData);
 
+                // Fetch Quizzes
+                const { data: quizzesData, error: quizzesError } = await supabase
+                    .from('quizzes')
+                    .select('*')
+                    .eq('course_id', courseId)
+                    .order('order', { ascending: true });
+
+                if (quizzesError) console.error("Error loading quizzes:", quizzesError);
+                else setQuizzes(quizzesData || []);
+
+                // Determine active lesson and progress
                 if (currentUser) {
                     const progress = await getCourseProgress(currentUser.id, courseId);
                     setCompletedLessons(progress.completed_lessons || []);
                     setCourseProgress(progress.progress || 0);
 
+                    // Set initial active lesson
                     if (lessonsData && lessonsData.length > 0) {
                         const firstIncomplete = lessonsData.find(
                             l => !progress.completed_lessons?.includes(l.id)
                         );
+                        // Also check if incomplete item is a quiz? For simplicity, stick to lessons first.
                         setActiveLesson(firstIncomplete || lessonsData[0]);
                     }
                 } else if (lessonsData && lessonsData.length > 0) {
@@ -130,25 +146,74 @@ const CourseViewer = () => {
         fetchCourseContent();
     }, [courseId]);
 
+    // Fetch quiz questions when rendering a quiz
     useEffect(() => {
-        const fetchQuiz = async () => {
-            if (!activeLesson?.id) return;
+        const fetchQuizDetails = async () => {
+            if (!activeLesson || activeLesson.type !== 'quiz') {
+                setQuizQuestions([]);
+                return;
+            }
 
-            const { data } = await supabase
-                .from('quiz_questions')
-                .select('*')
-                .eq('lesson_id', activeLesson.id)
-                .order('order');
+            try {
+                // Fetch questions
+                const { data: questions, error: qError } = await supabase
+                    .from('quiz_questions')
+                    .select('*')
+                    .eq('quiz_id', activeLesson.id)
+                    .order('order');
 
-            setQuizQuestions(data || []);
+                if (qError) throw qError;
 
-            // Expand the module containing the active lesson
-            const moduleTitle = getModuleTitle(activeLesson.title);
+                if (questions && questions.length > 0) {
+                    // Fetch options for all questions
+                    const questionIds = questions.map(q => q.id);
+                    const { data: options, error: oError } = await supabase
+                        .from('quiz_options')
+                        .select('*')
+                        .in('question_id', questionIds);
+
+                    if (oError) throw oError;
+
+                    // Group options by question
+                    const transformedQuestions = questions.map(q => {
+                        const qOptions = options.filter(o => o.question_id === q.id);
+                        // Find correct index
+                        const correctIndex = qOptions.findIndex(o => o.is_correct);
+
+                        return {
+                            id: q.id,
+                            question: q.question_text,
+                            options: qOptions.map(o => o.option_text),
+                            correct_index: correctIndex
+                        };
+                    });
+
+                    setQuizQuestions(transformedQuestions);
+                } else {
+                    setQuizQuestions([]);
+                }
+            } catch (err) {
+                console.error("Error fetching quiz details:", err);
+            }
+        };
+
+        fetchQuizDetails();
+
+        // Auto-expand module for active quiz/lesson
+        if (activeLesson) {
+            let moduleTitle = null;
+            if (activeLesson.type === 'quiz') {
+                const moduleNum = activeLesson.module_id.replace('module-', '');
+                moduleTitle = `Module ${moduleNum}`;
+            } else {
+                moduleTitle = getModuleTitle(activeLesson.title);
+            }
+
             if (moduleTitle) {
                 setExpandedModules(prev => ({ ...prev, [moduleTitle]: true }));
             }
-        };
-        fetchQuiz();
+        }
+
     }, [activeLesson?.id]);
 
     // Helper to detect if a lesson is a module header
@@ -167,17 +232,17 @@ const CourseViewer = () => {
         return match ? `Module ${match[1]}` : null;
     };
 
-    // Organize lessons into modules
+    // Organize lessons and quizzes into modules
     const organizedLessons = () => {
         const modules = {};
-        let currentModule = null;
 
+        // 1. Process Lessons
         lessons.forEach(lesson => {
             if (isModuleHeader(lesson.title)) {
                 const moduleNum = lesson.title.match(/^Module (\d+)/)?.[1];
-                currentModule = `Module ${moduleNum}`;
+                const currentModule = `Module ${moduleNum}`;
                 if (!modules[currentModule]) {
-                    modules[currentModule] = { header: lesson, lessons: [] };
+                    modules[currentModule] = { header: lesson, items: [] };
                 } else {
                     modules[currentModule].header = lesson;
                 }
@@ -185,9 +250,27 @@ const CourseViewer = () => {
                 const moduleNum = lesson.title.match(/^(\d+)\./)?.[1];
                 const moduleName = moduleNum ? `Module ${moduleNum}` : 'Other';
                 if (!modules[moduleName]) {
-                    modules[moduleName] = { header: null, lessons: [] };
+                    modules[moduleName] = { header: null, items: [] };
                 }
-                modules[moduleName].lessons.push(lesson);
+                // Add type 'lesson' to distinguish
+                modules[moduleName].items.push({ ...lesson, type: 'lesson' });
+            }
+        });
+
+        // 2. Process Quizzes and append to modules
+        quizzes.forEach(quiz => {
+            const moduleNum = quiz.module_id.replace('module-', '');
+            const moduleName = `Module ${moduleNum}`;
+
+            if (modules[moduleName]) {
+                modules[moduleName].items.push({
+                    ...quiz,
+                    type: 'quiz',
+                    // Use quiz title, ensure unique ID collision isn't an issue (UUIDs are fine)
+                });
+            } else {
+                // If module doesn't exist (e.g. no lessons), create it
+                modules[moduleName] = { header: { title: moduleName }, items: [{ ...quiz, type: 'quiz' }] };
             }
         });
 
@@ -201,8 +284,8 @@ const CourseViewer = () => {
         }));
     };
 
-    const handleLessonChange = (lesson) => {
-        setActiveLesson(lesson);
+    const handleLessonChange = (item) => {
+        setActiveLesson(item);
         setSidebarOpen(false); // Close mobile sidebar
         const contentContainer = document.getElementById('lesson-content-container');
         if (contentContainer) contentContainer.scrollTop = 0;
@@ -217,24 +300,41 @@ const CourseViewer = () => {
         }
     };
 
-    const getNextLesson = () => {
-        if (!activeLesson || !lessons.length) return null;
-        const currentIndex = lessons.findIndex(l => l.id === activeLesson.id);
-        return currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+    const getNextItem = () => {
+        // Flatten all items to find next
+        const allItems = [];
+        const modules = organizedLessons();
+        Object.values(modules).forEach(m => {
+            // For navigation, we usually skip headers unless they are lessons too.
+            // In current logic, headers are lessons.
+            if (m.header) allItems.push({ ...m.header, type: 'lesson' });
+            allItems.push(...m.items);
+        });
+
+        if (!activeLesson || !allItems.length) return null;
+        const currentIndex = allItems.findIndex(i => i.id === activeLesson.id);
+        return currentIndex < allItems.length - 1 ? allItems[currentIndex + 1] : null;
     };
 
-    const getPrevLesson = () => {
-        if (!activeLesson || !lessons.length) return null;
-        const currentIndex = lessons.findIndex(l => l.id === activeLesson.id);
-        return currentIndex > 0 ? lessons[currentIndex - 1] : null;
+    const getPrevItem = () => {
+        const allItems = [];
+        const modules = organizedLessons();
+        Object.values(modules).forEach(m => {
+            if (m.header) allItems.push({ ...m.header, type: 'lesson' });
+            allItems.push(...m.items);
+        });
+
+        if (!activeLesson || !allItems.length) return null;
+        const currentIndex = allItems.findIndex(i => i.id === activeLesson.id);
+        return currentIndex > 0 ? allItems[currentIndex - 1] : null;
     };
 
     if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><div className="loader"></div></div>;
     if (!course) return <div className="text-center py-5 mt-5">Course not found.</div>;
 
-    const nextLesson = getNextLesson();
-    const prevLesson = getPrevLesson();
-    const currentLessonComplete = isLessonComplete(completedLessons, activeLesson?.id);
+    const nextItem = getNextItem();
+    const prevItem = getPrevItem();
+    const currentItemComplete = isLessonComplete(completedLessons, activeLesson?.id);
     const modules = organizedLessons();
 
     const renderSidebarContent = () => (
@@ -271,7 +371,7 @@ const CourseViewer = () => {
                                     borderRadius: '8px',
                                     color: '#fff'
                                 }}
-                                onClick={() => moduleData.header ? handleLessonChange(moduleData.header) : toggleModule(moduleName)}
+                                onClick={() => moduleData.header ? handleLessonChange({ ...moduleData.header, type: 'lesson' }) : toggleModule(moduleName)}
                             >
                                 <div className="d-flex align-items-center">
                                     <i
@@ -281,12 +381,12 @@ const CourseViewer = () => {
                                     ></i>
                                     <span className="fw-medium small">{moduleName}</span>
                                 </div>
-                                {moduleData.lessons.length > 0 && (
-                                    <span className="badge bg-secondary small">{moduleData.lessons.length}</span>
+                                {moduleData.items.length > 0 && (
+                                    <span className="badge bg-secondary small">{moduleData.items.length}</span>
                                 )}
                             </button>
 
-                            {/* Collapsible Lessons */}
+                            {/* Collapsible Lessons & Quizzes */}
                             <div
                                 className="overflow-hidden transition-all"
                                 style={{
@@ -294,12 +394,14 @@ const CourseViewer = () => {
                                     transition: 'max-height 0.3s ease-out'
                                 }}
                             >
-                                {moduleData.lessons.map((lesson) => {
-                                    const complete = isLessonComplete(completedLessons, lesson.id);
-                                    const isActive = activeLesson?.id === lesson.id;
+                                {moduleData.items.map((item) => {
+                                    const complete = isLessonComplete(completedLessons, item.id);
+                                    const isActive = activeLesson?.id === item.id;
+                                    const isQuiz = item.type === 'quiz';
+
                                     return (
                                         <button
-                                            key={lesson.id}
+                                            key={item.id}
                                             className="btn btn-sm w-100 text-start py-2 ps-4 pe-3 border-0"
                                             style={{
                                                 background: isActive ? 'rgba(var(--bs-info-rgb), 0.15)' : 'transparent',
@@ -307,11 +409,12 @@ const CourseViewer = () => {
                                                 color: isActive ? '#fff' : 'rgba(255,255,255,0.7)',
                                                 marginTop: '2px'
                                             }}
-                                            onClick={() => handleLessonChange(lesson)}
+                                            onClick={() => handleLessonChange(item)}
                                         >
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <span className="small text-truncate" style={{ maxWidth: '200px' }}>
-                                                    {lesson.title.replace(/^\d+\.\d+\s*/, '')}
+                                                    {isQuiz && <i className="fas fa-question-circle me-1 text-warning"></i>}
+                                                    {item.title.replace(/^\d+\.\d+\s*/, '')}
                                                 </span>
                                                 {complete && <i className="fas fa-check-circle text-success small"></i>}
                                             </div>
@@ -323,7 +426,7 @@ const CourseViewer = () => {
                     ))
                 ) : (
                     <div className="text-center p-3 text-muted">
-                        <small>No lessons available yet.</small>
+                        <small>No content available yet.</small>
                     </div>
                 )}
             </div>
@@ -389,14 +492,16 @@ const CourseViewer = () => {
                                 <ol className="breadcrumb small text-muted mb-0">
                                     <li className="breadcrumb-item">{course.title}</li>
                                     <li className="breadcrumb-item active text-info" aria-current="page">
-                                        {isModuleHeader(activeLesson.title) ? activeLesson.title.split(':')[0] : activeLesson.title}
+                                        {activeLesson.type === 'quiz'
+                                            ? `Module ${activeLesson.module_id.replace('module-', '')} Assessment`
+                                            : (isModuleHeader(activeLesson.title) ? activeLesson.title.split(':')[0] : activeLesson.title)}
                                     </li>
                                 </ol>
                             </nav>
 
                             <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
                                 <h2 className="mb-0 fw-bold fs-4 fs-md-2">{activeLesson.title}</h2>
-                                {currentLessonComplete && (
+                                {currentItemComplete && (
                                     <span className="badge bg-success">
                                         <i className="fas fa-check me-1"></i> Completed
                                     </span>
@@ -413,53 +518,56 @@ const CourseViewer = () => {
                                 </div>
                             )}
 
-                            <div className="lesson-content typography glass-card p-3 p-md-5">
-                                <ReactMarkdown
-                                    remarkPlugins={[remarkGfm]}
-                                    components={{
-                                        code: CodeBlock,
-                                        table: ({ node, ...props }) => (
-                                            <div className="table-responsive my-4">
-                                                <table className="table table-dark table-striped table-hover border border-secondary border-opacity-25" {...props} />
-                                            </div>
-                                        )
-                                    }}
-                                >
-                                    {activeLesson.content || '*No content available.*'}
-                                </ReactMarkdown>
-                            </div>
+                            {activeLesson.type === 'quiz' ? (
+                                <QuizSection
+                                    questions={quizQuestions}
+                                    onPass={handleQuizPass}
+                                    isCompleted={currentItemComplete}
+                                />
+                            ) : (
+                                <div className="lesson-content typography glass-card p-3 p-md-5">
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            code: CodeBlock,
+                                            table: ({ node, ...props }) => (
+                                                <div className="table-responsive my-4">
+                                                    <table className="table table-dark table-striped table-hover border border-secondary border-opacity-25" {...props} />
+                                                </div>
+                                            )
+                                        }}
+                                    >
+                                        {activeLesson.content || '*No content available.*'}
+                                    </ReactMarkdown>
+                                </div>
+                            )}
 
-                            {/* Quiz Section */}
-                            <QuizSection
-                                questions={quizQuestions}
-                                onPass={handleQuizPass}
-                                isCompleted={currentLessonComplete}
-                            />
+                            {/* Existing quiz section logic removed/replaced above */}
 
                             {/* Navigation */}
                             <div className="d-flex justify-content-between align-items-center mt-5 mb-5 pb-5 gap-2 flex-wrap">
                                 <button
                                     className="btn btn-outline-light d-flex align-items-center gap-2"
-                                    onClick={() => prevLesson && handleLessonChange(prevLesson)}
-                                    disabled={!prevLesson}
-                                    style={{ visibility: prevLesson ? 'visible' : 'hidden' }}
+                                    onClick={() => prevItem && handleLessonChange(prevItem)}
+                                    disabled={!prevItem}
+                                    style={{ visibility: prevItem ? 'visible' : 'hidden' }}
                                 >
                                     <i className="fas fa-chevron-left"></i> <span className="d-none d-sm-inline">Previous</span>
                                 </button>
 
-                                {nextLesson ? (
+                                {nextItem ? (
                                     <button
                                         className="btn btn-gradient d-flex align-items-center gap-2"
-                                        onClick={() => handleLessonChange(nextLesson)}
+                                        onClick={() => handleLessonChange(nextItem)}
                                     >
-                                        <span className="d-none d-sm-inline">Next Lesson</span> <i className="fas fa-chevron-right"></i>
+                                        <span className="d-none d-sm-inline">{nextItem.type === 'quiz' ? 'Take Quiz' : 'Next Lesson'}</span> <i className="fas fa-chevron-right"></i>
                                     </button>
                                 ) : (
                                     <button
                                         className="btn btn-success d-flex align-items-center gap-2"
                                         onClick={() => navigate('/dashboard')}
                                     >
-                                        Complete <i className="fas fa-check"></i>
+                                        Complete Course <i className="fas fa-check"></i>
                                     </button>
                                 )}
                             </div>
