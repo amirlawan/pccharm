@@ -76,11 +76,11 @@ const QuizSection = ({ questions, onPass, onFail, isCompleted }) => {
 
     return (
         <div className="glass-card p-4 mt-4">
-            <div className="d-flex align-items-center mb-4">
-                <i className="fas fa-question-circle text-info fs-4 me-3"></i>
+            <div className="alert alert-info d-flex align-items-center mb-4 border-0" style={{ background: 'rgba(var(--bs-info-rgb), 0.1)' }}>
+                <i className="fas fa-info-circle text-info fs-4 me-3"></i>
                 <div>
-                    <h5 className="mb-0">Lesson Quiz</h5>
-                    <small className="text-muted">Score {PASS_THRESHOLD}% or higher to complete this lesson</small>
+                    <h6 className="mb-1 text-info">Complete this quiz to mark lesson done.</h6>
+                    <small className="text-muted">Pass rate: {PASS_THRESHOLD}%</small>
                 </div>
             </div>
 

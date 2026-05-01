@@ -4,6 +4,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import CourseCard from '../components/CourseCard';
 import { coursesData } from '../data/courses';
+import { unenrollUser } from '../lib/enrollmentService';
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
@@ -11,6 +12,9 @@ const Dashboard = () => {
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalLessonsCompleted, setTotalLessonsCompleted] = useState(0);
+    const [courseCompletedBanner, setCourseCompletedBanner] = useState(false);
+    const [courseToUnenroll, setCourseToUnenroll] = useState(null);
+    const [isUnenrolling, setIsUnenrolling] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -22,6 +26,11 @@ const Dashboard = () => {
                 return;
             }
             setUser(user);
+
+            if (sessionStorage.getItem('courseCompleted')) {
+                setCourseCompletedBanner(true);
+                sessionStorage.removeItem('courseCompleted');
+            }
 
             // Check if admin
             const { data: profile } = await supabase
@@ -81,6 +90,19 @@ const Dashboard = () => {
         navigate('/');
     };
 
+    const confirmUnenroll = async () => {
+        if (!courseToUnenroll) return;
+        setIsUnenrolling(true);
+        const { error } = await unenrollUser(courseToUnenroll.id, user.id);
+        if (error) {
+            alert(`Failed to unenroll: ${error.message}`);
+        } else {
+            setEnrolledCourses(prev => prev.filter(c => c.id !== courseToUnenroll.id));
+        }
+        setIsUnenrolling(false);
+        setCourseToUnenroll(null);
+    };
+
     const getProgressColor = (progress) => {
         if (progress >= 100) return 'bg-success';
         if (progress >= 50) return 'bg-info';
@@ -100,6 +122,12 @@ const Dashboard = () => {
                 <link rel="canonical" href="https://pccharm.vercel.app/dashboard" />
             </Helmet>
             <div className="container">
+                {courseCompletedBanner && (
+                    <div className="alert alert-success alert-dismissible fade show text-center border-0 shadow-lg" role="alert" style={{ background: 'var(--gradient-1)', color: 'white' }}>
+                        <i className="fas fa-party-horn me-2"></i><strong>🎉 Congratulations!</strong> You have successfully completed the course!
+                        <button type="button" className="btn-close btn-close-white" onClick={() => setCourseCompletedBanner(false)} aria-label="Close"></button>
+                    </div>
+                )}
                 <div className="row">
                     {/* Sidebar */}
                     <div className="col-lg-3 mb-4">
@@ -214,9 +242,18 @@ const Dashboard = () => {
                                                         </div>
                                                         <small className="text-muted">{course.progress}% complete</small>
                                                     </div>
-                                                    <Link to={`/learn/${course.id}`} className="btn btn-sm btn-gradient">
-                                                        {course.progress >= 100 ? 'Review' : 'Resume'}
-                                                    </Link>
+                                                    <div className="d-flex gap-2">
+                                                        <button 
+                                                            className="btn btn-sm btn-outline-danger px-2" 
+                                                            onClick={() => setCourseToUnenroll(course)}
+                                                            title="Unenroll (Warning: Lose Progress)"
+                                                        >
+                                                            <i className="fas fa-trash-alt"></i>
+                                                        </button>
+                                                        <Link to={`/learn/${course.id}`} className="btn btn-sm btn-gradient">
+                                                            {course.progress >= 100 ? 'Review' : 'Resume'}
+                                                        </Link>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -254,6 +291,42 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Custom Unenroll Modal Overlay */}
+            {courseToUnenroll && (
+                <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)', zIndex: 2000 }}>
+                    <div className="glass-card p-4 p-md-5 m-3 text-center animate-fade-in" style={{ maxWidth: '500px', border: '1px solid rgba(220, 53, 69, 0.3)' }}>
+                        <div className="icon-circle mx-auto mb-4 bg-danger bg-opacity-25 text-danger" style={{ width: '80px', height: '80px', fontSize: '2.5rem' }}>
+                            <i className="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3 className="mb-3">Unenroll from Course?</h3>
+                        <p className="text-muted mb-4">
+                            Are you sure you want to unenroll from <strong className="text-white">{courseToUnenroll.title}</strong>?<br/><br/>
+                            <span className="text-danger fw-bold"><i className="fas fa-radiation me-2"></i>This will permanently delete all your progress. This action cannot be undone.</span>
+                        </p>
+                        <div className="d-flex justify-content-center gap-3">
+                            <button 
+                                className="btn btn-outline-light px-4" 
+                                onClick={() => setCourseToUnenroll(null)}
+                                disabled={isUnenrolling}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className="btn btn-danger px-4 d-flex align-items-center gap-2" 
+                                onClick={confirmUnenroll}
+                                disabled={isUnenrolling}
+                            >
+                                {isUnenrolling ? (
+                                    <><span className="spinner-border spinner-border-sm"></span> Processing...</>
+                                ) : (
+                                    <><i className="fas fa-trash-alt"></i> Yes, Unenroll</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 };

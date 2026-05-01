@@ -53,6 +53,18 @@ const Navbar = () => {
                     <ul className="navbar-nav ms-auto">
                         <li className="nav-item"><Link className="nav-link" to="/">Home</Link></li>
                         <li className="nav-item"><Link className="nav-link" to="/academy">Academy</Link></li>
+                        <li className="nav-item">
+                            <span className="nav-link text-muted" style={{ cursor: "default" }}>
+                                Blog <span className="badge bg-secondary ms-1" style={{ fontSize: "0.6rem" }}>Soon</span>
+                            </span>
+                        </li>
+                        <li className="nav-item">
+                            {location.pathname === '/' ? (
+                                <a className="nav-link" href="#community">Community</a>
+                            ) : (
+                                <Link className="nav-link" to="/#community">Community</Link>
+                            )}
+                        </li>
 
                         {!user ? (
                             <>
