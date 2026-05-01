@@ -71,6 +71,8 @@ const CourseViewer = () => {
     const [loading, setLoading] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [expandedModules, setExpandedModules] = useState({});
+    const [showSuccessToast, setShowSuccessToast] = useState(false);
+    const [savingProgress, setSavingProgress] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -291,13 +293,32 @@ const CourseViewer = () => {
         if (contentContainer) contentContainer.scrollTop = 0;
     };
 
-    const handleQuizPass = async () => {
-        if (!user || !activeLesson) return;
+    const handleLessonComplete = async () => {
+        if (!user || !activeLesson || savingProgress) return;
+        setSavingProgress(true);
         const result = await markLessonComplete(user.id, courseId, activeLesson.id);
         if (result.success) {
             setCompletedLessons(result.completedLessons);
             setCourseProgress(result.progress);
+            
+            setShowSuccessToast(true);
+            const contentContainer = document.getElementById('lesson-content-container');
+            if (contentContainer) {
+                contentContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            setTimeout(() => {
+                setShowSuccessToast(false);
+                const nextItem = getNextItem();
+                if (nextItem) {
+                    handleLessonChange(nextItem);
+                } else {
+                    sessionStorage.setItem('courseCompleted', 'true');
+                    navigate('/dashboard');
+                }
+            }, 1500);
         }
+        setSavingProgress(false);
     };
 
     const getNextItem = () => {
@@ -336,6 +357,15 @@ const CourseViewer = () => {
     const prevItem = getPrevItem();
     const currentItemComplete = isLessonComplete(completedLessons, activeLesson?.id);
     const modules = organizedLessons();
+
+    // Flatten items for numbering and progress
+    const allItems = [];
+    Object.values(modules).forEach(m => {
+        if (m.header) allItems.push({ ...m.header, type: 'lesson' });
+        allItems.push(...m.items);
+    });
+    const totalItems = allItems.length;
+    const currentItemIndex = activeLesson ? allItems.findIndex(i => i.id === activeLesson.id) + 1 : 0;
 
     const renderSidebarContent = () => (
         <>
@@ -398,6 +428,7 @@ const CourseViewer = () => {
                                     const complete = isLessonComplete(completedLessons, item.id);
                                     const isActive = activeLesson?.id === item.id;
                                     const isQuiz = item.type === 'quiz';
+                                    const globalIdx = allItems.findIndex(i => i.id === item.id) + 1;
 
                                     return (
                                         <button
@@ -413,6 +444,7 @@ const CourseViewer = () => {
                                         >
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <span className="small text-truncate" style={{ maxWidth: '200px' }}>
+                                                    <span className="text-muted me-2">{globalIdx}.</span>
                                                     {isQuiz && <i className="fas fa-question-circle me-1 text-warning"></i>}
                                                     {item.title.replace(/^\d+\.\d+\s*/, '')}
                                                 </span>
@@ -434,40 +466,31 @@ const CourseViewer = () => {
     );
 
     return (
-        <div className="d-flex w-100 overflow-hidden" style={{ height: '100vh', paddingTop: '70px' }}>
-            {/* Mobile Sidebar Toggle */}
-            <button
-                className="btn btn-info position-fixed d-md-none"
-                style={{ bottom: '20px', right: '20px', zIndex: 1050, borderRadius: '50%', width: '56px', height: '56px' }}
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-                <i className={`fas ${sidebarOpen ? 'fa-times' : 'fa-bars'}`}></i>
-            </button>
+        <div className="d-flex flex-column flex-md-row w-100 overflow-hidden" style={{ height: '100vh', paddingTop: '70px' }}>
+            {/* Mobile Top Bar Toggle */}
+            <div className="d-md-none bg-dark border-bottom border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center z-3 shadow-sm">
+                <span className="fw-bold text-info"><i className="fas fa-list me-2"></i>Lessons</span>
+                <button 
+                    className="btn btn-outline-light btn-sm"
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                    {sidebarOpen ? 'Close' : 'Expand'} <i className={`fas ${sidebarOpen ? 'fa-chevron-up' : 'fa-chevron-down'} ms-1`}></i>
+                </button>
+            </div>
 
-            {/* Sidebar Overlay (Mobile) */}
-            {sidebarOpen && (
-                <div
-                    className="position-fixed d-md-none"
-                    style={{ inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1040, top: '70px' }}
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
-
-            {/* Mobile Sidebar */}
-            <div
-                className="glass-card rounded-0 border-end border-secondary border-opacity-25 flex-column position-fixed d-md-none"
+            {/* Mobile Sidebar (Collapsible inline) */}
+            <div 
+                className={`d-md-none bg-dark border-bottom border-secondary border-opacity-25 overflow-hidden transition-all z-2 ${sidebarOpen ? 'd-block' : 'd-none'}`}
                 style={{
-                    width: '280px',
-                    height: 'calc(100vh - 70px)',
+                    maxHeight: sidebarOpen ? '50vh' : '0',
                     overflowY: 'auto',
-                    zIndex: 1045,
-                    left: sidebarOpen ? 0 : '-280px',
-                    top: '70px',
-                    transition: 'left 0.3s ease',
-                    display: 'flex'
+                    transition: 'max-height 0.3s ease-out',
+                    position: 'relative'
                 }}
             >
-                {renderSidebarContent()}
+                <div className="w-100 flex-column d-flex">
+                    {renderSidebarContent()}
+                </div>
             </div>
 
             {/* Desktop Sidebar */}
@@ -485,9 +508,33 @@ const CourseViewer = () => {
 
             {/* Main Content */}
             <div id="lesson-content-container" className="flex-grow-1 overflow-auto bg-dark position-relative h-100">
+                {/* Toast Notification */}
+                {showSuccessToast && (
+                    <div className="position-fixed top-0 start-50 translate-middle-x mt-3 z-3 animate-fade-in" style={{ marginTop: '80px' }}>
+                        <div className="toast show align-items-center text-white bg-success border-0 shadow-lg" role="alert">
+                            <div className="d-flex px-3 py-2">
+                                <div className="toast-body fs-6 fw-bold">
+                                    <i className="fas fa-check-circle me-2"></i> Lesson complete!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                
                 <div className="container py-4 py-md-5 px-3 px-lg-5" style={{ maxWidth: '900px' }}>
                     {activeLesson ? (
                         <div className="animate-fade-in">
+                            {/* Slim Progress Bar */}
+                            <div className="mb-4">
+                                <div className="d-flex justify-content-between align-items-center mb-2 small text-muted fw-bold">
+                                    <span>Lesson {currentItemIndex} of {totalItems}</span>
+                                    <span>{courseProgress}% complete</span>
+                                </div>
+                                <div className="progress" style={{ height: '4px', background: 'rgba(255,255,255,0.1)' }}>
+                                    <div className="progress-bar bg-info" style={{ width: `${courseProgress}%` }}></div>
+                                </div>
+                            </div>
+
                             <nav aria-label="breadcrumb" className="mb-4">
                                 <ol className="breadcrumb small text-muted mb-0">
                                     <li className="breadcrumb-item">{course.title}</li>
@@ -521,7 +568,7 @@ const CourseViewer = () => {
                             {activeLesson.type === 'quiz' ? (
                                 <QuizSection
                                     questions={quizQuestions}
-                                    onPass={handleQuizPass}
+                                    onPass={handleLessonComplete}
                                     isCompleted={currentItemComplete}
                                 />
                             ) : (
@@ -539,6 +586,27 @@ const CourseViewer = () => {
                                     >
                                         {activeLesson.content || '*No content available.*'}
                                     </ReactMarkdown>
+
+                                    {/* Mark Complete Button for Non-Quiz */}
+                                    <div className="mt-5 pt-4 border-top border-secondary border-opacity-25 d-flex justify-content-center">
+                                        {currentItemComplete ? (
+                                            <button className="btn btn-outline-success px-4" disabled>
+                                                <i className="fas fa-check-circle me-2"></i> Completed
+                                            </button>
+                                        ) : (
+                                            <button 
+                                                className="btn btn-success px-4 py-2 fs-5 shadow-lg d-flex align-items-center"
+                                                onClick={handleLessonComplete}
+                                                disabled={savingProgress}
+                                            >
+                                                {savingProgress ? (
+                                                    <><span className="spinner-border spinner-border-sm me-2"></span> Saving...</>
+                                                ) : (
+                                                    <>Done reading? Mark as Complete <i className="fas fa-arrow-right ms-2"></i></>
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             )}
 
