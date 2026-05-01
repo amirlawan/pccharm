@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import AOS from 'aos';
 
 const Home = () => {
@@ -154,6 +155,11 @@ const Home = () => {
 
     return (
         <main>
+            <Helmet>
+                <title>PcCharm™ - Engineer the Future | AI & Tech Learning Platform</title>
+                <meta name="description" content="Future-proof your skills with AI-powered courses in Cybersecurity, Web Development, Data Science, and more." />
+                <link rel="canonical" href="https://pccharm.vercel.app/" />
+            </Helmet>
             {/* Hero Section */}
             <section id="home" className="hero">
                 <div className="container">
