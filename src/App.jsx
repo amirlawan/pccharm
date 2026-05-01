@@ -9,6 +9,8 @@ import Academy from './pages/Academy';
 import CourseViewer from './pages/CourseViewer';
 import Admin from './pages/Admin';
 import ProtectedRoute from './components/ProtectedRoute';
+import Certificates from './pages/Certificates';
+import NotFound from './pages/NotFound';
 
 function AppContent() {
   const location = useLocation();
@@ -32,6 +34,14 @@ function AppContent() {
           }
         />
         <Route
+          path="/certificates"
+          element={
+            <ProtectedRoute>
+              <Certificates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/learn/:courseId"
           element={
             <ProtectedRoute>
@@ -42,11 +52,12 @@ function AppContent() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requireAdmin={true}>
               <Admin />
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       {!isLearningMode && !isAdminMode && <Footer />}
     </>

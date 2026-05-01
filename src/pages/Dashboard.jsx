@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import CourseCard from '../components/CourseCard';
+import { coursesData } from '../data/courses';
 
 const Dashboard = () => {
     const [user, setUser] = useState(null);
@@ -9,6 +12,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [totalLessonsCompleted, setTotalLessonsCompleted] = useState(0);
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const getUserData = async () => {
@@ -70,7 +74,7 @@ const Dashboard = () => {
         };
 
         getUserData();
-    }, [navigate]);
+    }, [navigate, location]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
@@ -87,9 +91,14 @@ const Dashboard = () => {
     if (!user) return null;
 
     const completedCourses = enrolledCourses.filter(c => c.progress >= 100).length;
+    const starterCourses = coursesData.filter(c => ['html', 'python', 'linux'].includes(c.id));
 
     return (
         <section className="hero" style={{ minHeight: '100vh', paddingTop: '100px', paddingBottom: '50px' }}>
+            <Helmet>
+                <title>My Dashboard | PcCharm™</title>
+                <link rel="canonical" href="https://pccharm.vercel.app/dashboard" />
+            </Helmet>
             <div className="container">
                 <div className="row">
                     {/* Sidebar */}
@@ -119,9 +128,9 @@ const Dashboard = () => {
                                     </Link>
                                 </li>
                                 <li className="mb-3">
-                                    <button onClick={() => alert("Certificates feature coming soon!")} className="btn btn-link text-muted text-decoration-none d-flex align-items-center hover-text-white p-0 text-start">
+                                    <Link to="/certificates" className="text-muted text-decoration-none d-flex align-items-center hover-text-white">
                                         <i className="fas fa-certificate me-3" style={{ width: '20px' }}></i> Certificates
-                                    </button>
+                                    </Link>
                                 </li>
                                 {isAdmin && (
                                     <li className="mb-3">
@@ -216,9 +225,29 @@ const Dashboard = () => {
                             ) : (
                                 <div className="text-center py-4">
                                     <p className="text-muted mb-3">You haven't enrolled in any courses yet.</p>
-                                    <Link to="/academy" className="btn btn-gradient">
+                                    <Link to="/academy" className="btn btn-gradient mb-4">
                                         Explore Courses
                                     </Link>
+
+                                    <div className="text-start mt-4 border-top border-secondary border-opacity-25 pt-5">
+                                        <h5 className="mb-4 text-warning">Recommended to start with:</h5>
+                                        <div className="row g-4 mb-4">
+                                            {starterCourses.map((course, idx) => (
+                                                <CourseCard 
+                                                    key={course.id} 
+                                                    course={course} 
+                                                    index={idx} 
+                                                    isEnrolled={false} 
+                                                    onEnroll={() => navigate('/academy')} 
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="text-center mt-2">
+                                            <Link to="/academy" className="text-info text-decoration-none hover-text-white fw-bold">
+                                                Head to the Academy to enroll <i className="fas fa-arrow-right ms-1"></i>
+                                            </Link>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </div>

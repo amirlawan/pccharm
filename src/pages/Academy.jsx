@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { enrollUser, getUserEnrollments } from '../lib/enrollmentService';
@@ -119,6 +120,11 @@ const Academy = () => {
 
     return (
         <main>
+            <Helmet>
+                <title>Course Catalog | PcCharm™</title>
+                <meta name="description" content="Browse 20+ courses in AI, Cybersecurity, Web Dev, Cloud, and more. Beginner to advanced." />
+                <link rel="canonical" href="https://pccharm.vercel.app/academy" />
+            </Helmet>
             {/* Hero Section */}
             <section id="home" className="hero">
                 <div className="container">

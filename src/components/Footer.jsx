@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Footer = () => {
     const currentYear = new Date().getFullYear();
+    const location = useLocation();
+    const isHome = location.pathname === '/';
 
     return (
         <footer>
@@ -38,8 +40,18 @@ const Footer = () => {
                             <h5>Resources</h5>
                             <ul>
                                 <li><Link to="/academy">Academy</Link></li>
-                                <li><a href="#community">Community</a></li>
-                                <li><a href="#">Blog</a></li>
+                                <li>
+                                    {isHome ? (
+                                        <a href="#community">Community</a>
+                                    ) : (
+                                        <Link to="/#community">Community</Link>
+                                    )}
+                                </li>
+                                <li>
+                                    <span className="text-muted" style={{cursor: "default"}}>
+                                        Blog <span className="badge bg-secondary ms-1" style={{fontSize:"0.6rem"}}>Soon</span>
+                                    </span>
+                                </li>
                                 <li><a href="#">Careers</a></li>
                             </ul>
                         </div>

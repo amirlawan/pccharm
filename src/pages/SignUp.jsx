@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const SignUp = () => {
     const [email, setEmail] = useState('');
@@ -38,8 +39,12 @@ const SignUp = () => {
     };
 
     return (
-        <section className="hero d-flex align-items-center justify-content-center">
-            <div className="container" style={{ paddingTop: '80px' }}>
+        <section className="hero d-flex align-items-center justify-content-center" style={{ minHeight: '100vh', paddingTop: '80px', paddingBottom: '40px' }}>
+            <Helmet>
+                <title>Create Account | PcCharm™</title>
+                <link rel="canonical" href="https://pccharm.vercel.app/signup" />
+            </Helmet>
+            <div className="container">
                 <div className="row justify-content-center">
                     <div className="col-md-6 col-lg-5">
                         <div className="glass-card p-5">

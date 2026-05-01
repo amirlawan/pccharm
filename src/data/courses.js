@@ -141,8 +141,8 @@ export const coursesData = [
         title: 'Introduction to ChatGPT',
         description: 'Explore the capabilities and applications of large language models like ChatGPT.',
         icon: 'fas fa-comments',
-        category: 'emerging-specialized',
-        categoryLabel: 'Emerging & Specialized',
+        category: 'ai-data',
+        categoryLabel: 'AI & Data Science',
         badge: 'New'
     },
     {
@@ -150,8 +150,8 @@ export const coursesData = [
         title: 'Data Science Fundamentals',
         description: 'Learn the basics of data analysis, visualization, and machine learning concepts.',
         icon: 'fas fa-chart-line',
-        category: 'emerging-specialized',
-        categoryLabel: 'Emerging & Specialized',
+        category: 'ai-data',
+        categoryLabel: 'AI & Data Science',
         badge: 'New'
     },
     {
@@ -159,8 +159,8 @@ export const coursesData = [
         title: 'Career Roadmap Planning',
         description: 'Develop strategies for navigating the tech job market and planning your career path.',
         icon: 'fas fa-map-signs',
-        category: 'emerging-specialized',
-        categoryLabel: 'Emerging & Specialized',
+        category: 'career',
+        categoryLabel: 'Career Development',
         badge: 'New'
     },
     {
@@ -168,8 +168,8 @@ export const coursesData = [
         title: 'Introduction to AI',
         description: 'Grasp the fundamental concepts and history behind Artificial Intelligence.',
         icon: 'fas fa-robot',
-        category: 'emerging-specialized',
-        categoryLabel: 'Emerging & Specialized'
+        category: 'ai-data',
+        categoryLabel: 'AI & Data Science'
     },
 
     // Other & Upcoming
@@ -178,32 +178,32 @@ export const coursesData = [
         title: 'Version Control (Git & GitHub)',
         description: 'Learn essential Git commands and collaboration workflows using GitHub.',
         icon: 'fab fa-git-alt',
-        category: 'other-upcoming',
-        categoryLabel: 'Other & Upcoming'
+        category: 'web-development',
+        categoryLabel: 'Programming & Web Dev'
     },
     {
         id: 'cloud',
         title: 'Cloud Computing Basics',
         description: 'Introduction to core cloud concepts using platforms like AWS or Azure.',
         icon: 'fas fa-cloud',
-        category: 'other-upcoming',
-        categoryLabel: 'Other & Upcoming'
+        category: 'cloud-devops',
+        categoryLabel: 'Cloud & DevOps'
     },
     {
         id: 'agile',
         title: 'Agile & Scrum Fundamentals',
         description: 'Understand agile principles and the Scrum framework for project management.',
         icon: 'fas fa-sync-alt',
-        category: 'other-upcoming',
-        categoryLabel: 'Other & Upcoming'
+        category: 'cloud-devops',
+        categoryLabel: 'Cloud & DevOps'
     },
     {
         id: 'technical-writing',
         title: 'Technical Writing',
         description: 'Learn to write clear and concise documentation for technical audiences.',
         icon: 'fas fa-pencil-alt',
-        category: 'other-upcoming',
-        categoryLabel: 'Other & Upcoming'
+        category: 'career',
+        categoryLabel: 'Career Development'
     },
     {
         id: 'more',
