@@ -74,7 +74,8 @@ const Academy = () => {
 
     // Filter and Sort Logic
     const filteredCourses = useMemo(() => {
-        let result = courses;
+        // Filter out courses that are explicitly marked as not visible
+        let result = courses.filter(course => course.is_visible !== false);
 
         if (categoryFilter !== 'all') {
             result = result.filter(course => course.category === categoryFilter);
