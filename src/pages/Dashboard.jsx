@@ -72,67 +72,58 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (!user) return;
-        const getUserData = async () => {
 
-            if (sessionStorage.getItem('courseCompleted')) {
-                setCourseCompletedBanner(true);
-                sessionStorage.removeItem('courseCompleted');
+        if (sessionStorage.getItem('courseCompleted')) {
+            setCourseCompletedBanner(true);
+            sessionStorage.removeItem('courseCompleted');
+        }
+
+        const loadDashboard = async () => {
+            // Run ALL queries in parallel instead of sequential
+            const [annResult, enrollResult, notifResult, readsResult] = await Promise.allSettled([
+                // 1. Announcements
+                supabase.from('announcements').select('*').eq('is_active', true).order('created_at', { ascending: false }),
+                // 2. Enrollments (main data)
+                supabase.from('enrollments').select(`course_id, progress, completed_lessons, courses (id, title, description, icon, category)`).eq('user_id', user.id),
+                // 3. Notifications
+                supabase.from('notifications').select('*').order('created_at', { ascending: false }),
+                // 4. Notification reads
+                supabase.from('notification_reads').select('notification_id').eq('user_id', user.id),
+            ]);
+
+            // Process announcements
+            if (annResult.status === 'fulfilled' && !annResult.value.error) {
+                setAnnouncements(annResult.value.data || []);
             }
 
-            // Fetch active announcements
-            try {
-                const { data: annData, error: annError } = await supabase
-                    .from('announcements')
-                    .select('*')
-                    .eq('is_active', true)
-                    .order('created_at', { ascending: false });
-                if (!annError) setAnnouncements(annData || []);
-            } catch { /* silently skip if table doesn't exist or RLS blocks */ }
-
-            // Fetch Enrollments with Course Details
-            try {
-                const { data, error } = await supabase
-                    .from('enrollments')
-                    .select(`
-                        course_id,
-                        progress,
-                        completed_lessons,
-                        courses (
-                            id,
-                            title,
-                            description,
-                            icon,
-                            category
-                        )
-                    `)
-                    .eq('user_id', user.id);
-
-                if (error) {
-                    console.error("Error fetching enrollments:", error);
-                } else {
-                    // Flatten structure
-                    const formattedDetails = data.map(item => ({
-                        ...item.courses,
-                        progress: item.progress || 0,
-                        completed_lessons: item.completed_lessons || [],
-                        enrolled_at: item.enrolled_at
-                    }));
-                    setEnrolledCourses(formattedDetails);
-
-                    // Count total lessons completed
-                    const total = data.reduce((acc, item) => acc + (item.completed_lessons?.length || 0), 0);
-                    setTotalLessonsCompleted(total);
-                }
-            } catch (err) {
-                console.error("Unexpected error:", err);
-            } finally {
-                setLoading(false);
+            // Process enrollments
+            if (enrollResult.status === 'fulfilled' && !enrollResult.value.error) {
+                const data = enrollResult.value.data || [];
+                const formattedDetails = data.map(item => ({
+                    ...item.courses,
+                    progress: item.progress || 0,
+                    completed_lessons: item.completed_lessons || [],
+                    enrolled_at: item.enrolled_at
+                }));
+                setEnrolledCourses(formattedDetails);
+                const total = data.reduce((acc, item) => acc + (item.completed_lessons?.length || 0), 0);
+                setTotalLessonsCompleted(total);
             }
+
+            // Process notifications
+            if (notifResult.status === 'fulfilled' && !notifResult.value.error) {
+                setNotifications(notifResult.value.data || []);
+            }
+            if (readsResult.status === 'fulfilled' && !readsResult.value.error) {
+                setNotifReads((readsResult.value.data || []).map(r => r.notification_id));
+            }
+
+            setLoading(false);
+            setNotifLoading(false);
         };
 
-        getUserData();
-        fetchNotifications();
-    }, [user, navigate, location]);
+        loadDashboard();
+    }, [user]);
 
     // Realtime subscription for new notifications
     useEffect(() => {
