@@ -1,26 +1,15 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../lib/AuthContext';
 
 const Navbar = () => {
-    const [user, setUser] = useState(null);
+    const { user } = useAuth();
     const [scrolled, setScrolled] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check auth state
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-        };
-        getUser();
-
-        // Listen for auth changes
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-            setUser(session?.user ?? null);
-        });
-
         // Scroll listener
         const handleScroll = () => {
             setScrolled(window.scrollY > 50);
@@ -28,7 +17,6 @@ const Navbar = () => {
         window.addEventListener('scroll', handleScroll);
 
         return () => {
-            authListener.subscription.unsubscribe();
             window.removeEventListener('scroll', handleScroll);
         };
     }, []);

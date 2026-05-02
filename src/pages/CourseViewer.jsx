@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../lib/AuthContext';
 import QuizSection from '../components/QuizSection';
 import { markLessonComplete, getCourseProgress, isLessonComplete } from '../lib/progressService';
 
 const CourseViewer = () => {
     const { courseId } = useParams();
-    const [user, setUser] = useState(null);
+    const { user } = useAuth();
     const [course, setCourse] = useState(null);
     const [lessons, setLessons] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
@@ -25,8 +26,7 @@ const CourseViewer = () => {
         const fetchCourseContent = async () => {
             setLoading(true);
             try {
-                const { data: { user: currentUser } } = await supabase.auth.getUser();
-                setUser(currentUser);
+                if (!user) return;
 
                 // Fetch Course Info
                 const { data: courseData, error: courseError } = await supabase
