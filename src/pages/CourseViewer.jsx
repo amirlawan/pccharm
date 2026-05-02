@@ -1,62 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import QuizSection from '../components/QuizSection';
 import { markLessonComplete, getCourseProgress, isLessonComplete } from '../lib/progressService';
-
-// Custom Code Component with Copy Button
-const CodeBlock = ({ node, inline, className, children, ...props }) => {
-    const match = /language-(\w+)/.exec(className || '');
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = () => {
-        const text = String(children).replace(/\n$/, '');
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    if (!inline && match) {
-        return (
-            <div className="position-relative my-4 code-block-wrapper">
-                <div className="d-flex justify-content-between align-items-center bg-dark text-muted px-3 py-1 rounded-top border-bottom border-secondary border-opacity-25 small">
-                    <span>{match[1]}</span>
-                    <button
-                        onClick={handleCopy}
-                        className="btn btn-link btn-sm text-muted text-decoration-none hover-text-white p-0"
-                    >
-                        {copied ? <><i className="fas fa-check me-1 text-success"></i> Copied</> : <><i className="far fa-copy me-1"></i> Copy</>}
-                    </button>
-                </div>
-                <SyntaxHighlighter
-                    {...props}
-                    style={vscDarkPlus}
-                    language={match[1]}
-                    PreTag="div"
-                    className="rounded-bottom m-0"
-                    customStyle={{
-                        margin: 0,
-                        padding: '1.5rem',
-                        fontSize: '0.9rem',
-                        background: 'rgba(0,0,0,0.3)'
-                    }}
-                >
-                    {String(children).replace(/\n$/, '')}
-                </SyntaxHighlighter>
-            </div>
-        );
-    }
-
-    return (
-        <code className={className} {...props}>
-            {children}
-        </code>
-    );
-};
 
 const CourseViewer = () => {
     const { courseId } = useParams();
@@ -573,19 +519,10 @@ const CourseViewer = () => {
                                 />
                             ) : (
                                 <div className="lesson-content typography glass-card p-3 p-md-5">
-                                    <ReactMarkdown
-                                        remarkPlugins={[remarkGfm]}
-                                        components={{
-                                            code: CodeBlock,
-                                            table: ({ node, ...props }) => (
-                                                <div className="table-responsive my-4">
-                                                    <table className="table table-dark table-striped table-hover border border-secondary border-opacity-25" {...props} />
-                                                </div>
-                                            )
-                                        }}
-                                    >
-                                        {activeLesson.content || '*No content available.*'}
-                                    </ReactMarkdown>
+                                    <div 
+                                        className="quill-content text-white"
+                                        dangerouslySetInnerHTML={{ __html: activeLesson.content || '<i>No content available.</i>' }}
+                                    />
 
                                     {/* Mark Complete Button for Non-Quiz */}
                                     <div className="mt-5 pt-4 border-top border-secondary border-opacity-25 d-flex justify-content-center">
