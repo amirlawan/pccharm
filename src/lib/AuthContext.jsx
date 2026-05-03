@@ -10,33 +10,61 @@ export const AuthProvider = ({ children }) => {
     const initialized = useRef(false);
 
     useEffect(() => {
-        // Prevent double-init in StrictMode
-        if (initialized.current) return;
-        initialized.current = true;
-
         const init = async () => {
+            let currentUser = null;
+            let currentIsAdmin = false;
+
+            const validateSession = async () => {
+                try {
+                    const { data: { session }, error } = await supabase.auth.getSession();
+                    if (error || !session) {
+                        Object.keys(localStorage)
+                            .filter(key => key.startsWith('sb-'))
+                            .forEach(key => localStorage.removeItem(key));
+                    }
+                } catch {
+                    Object.keys(localStorage)
+                        .filter(key => key.startsWith('sb-'))
+                        .forEach(key => localStorage.removeItem(key));
+                }
+            };
+
+            await validateSession();
+            
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                const authCheckWithTimeout = Promise.race([
+                    supabase.auth.getSession(),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Auth timeout')), 5000)
+                    )
+                ]);
+
+                const { data: { session } } = await authCheckWithTimeout;
                 if (session?.user) {
-                    let admin = false;
+                    currentUser = session.user;
                     try {
                         const { data } = await supabase
                             .from('profiles')
                             .select('is_admin')
-                            .eq('id', session.user.id)
+                            .eq('id', currentUser.id)
                             .single();
-                        admin = data?.is_admin === true;
+                        currentIsAdmin = data?.is_admin === true;
                     } catch { /* default false */ }
-                    setState({ user: session.user, isAdmin: admin, loading: false });
-                } else {
-                    setState({ user: null, isAdmin: false, loading: false });
                 }
-            } catch {
-                setState({ user: null, isAdmin: false, loading: false });
+            } catch (err) {
+                console.warn('Auth check failed or timed out:', err.message);
+                await supabase.auth.signOut(); // clears corrupted localStorage token
+                currentUser = null;
+                currentIsAdmin = false;
+            } finally {
+                setState({ user: currentUser, isAdmin: currentIsAdmin, loading: false });
             }
         };
 
-        init();
+        if (!initialized.current) {
+            initialized.current = true;
+            init();
+        }
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
