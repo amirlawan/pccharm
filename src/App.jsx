@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -60,6 +61,7 @@ function AppContent() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       {!isLearningMode && !isAdminMode && <Footer />}
+      <Analytics />
     </>
   );
 }
