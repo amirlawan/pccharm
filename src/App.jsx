@@ -1,16 +1,20 @@
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import Academy from './pages/Academy';
-import CourseViewer from './pages/CourseViewer';
-import Admin from './pages/Admin';
 import ProtectedRoute from './components/ProtectedRoute';
-import Certificates from './pages/Certificates';
-import NotFound from './pages/NotFound';
+import { SpeedInsights } from '@vercel/speed-insights/react';
+
+// Lazy load page components
+const Home = React.lazy(() => import('./pages/Home'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Login = React.lazy(() => import('./pages/Login'));
+const SignUp = React.lazy(() => import('./pages/SignUp'));
+const Academy = React.lazy(() => import('./pages/Academy'));
+const CourseViewer = React.lazy(() => import('./pages/CourseViewer'));
+const Admin = React.lazy(() => import('./pages/Admin'));
+const Certificates = React.lazy(() => import('./pages/Certificates'));
+const NotFound = React.lazy(() => import('./pages/NotFound'));
 
 function AppContent() {
   const location = useLocation();
@@ -20,45 +24,47 @@ function AppContent() {
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/academy" element={<Academy />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/certificates"
-          element={
-            <ProtectedRoute>
-              <Certificates />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/learn/:courseId"
-          element={
-            <ProtectedRoute>
-              <CourseViewer />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute requireAdmin={true}>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <Suspense fallback={<div className="d-flex justify-content-center align-items-center" style={{ height: '100vh', background: 'var(--bg-dark)' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/academy" element={<Academy />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/certificates"
+            element={
+              <ProtectedRoute>
+                <Certificates />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/learn/:courseId"
+            element={
+              <ProtectedRoute>
+                <CourseViewer />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireAdmin={true}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
       {!isLearningMode && !isAdminMode && <Footer />}
     </>
   );
@@ -68,6 +74,7 @@ function App() {
   return (
     <Router>
       <AppContent />
+      <SpeedInsights />
     </Router>
   );
 }
