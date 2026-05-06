@@ -38,42 +38,45 @@ const CourseViewer = () => {
                 if (courseError) throw courseError;
                 setCourse(courseData);
 
-                // Fetch Lessons
+                // Fetch Lessons — try order_index first, fall back to order
                 const { data: lessonsData, error: lessonsError } = await supabase
                     .from('lessons')
                     .select('*')
                     .eq('course_id', courseId)
+                    .order('order_index', { ascending: true })
                     .order('order', { ascending: true });
 
                 if (lessonsError) throw lessonsError;
-                setLessons(lessonsData);
+                setLessons(lessonsData || []);
 
-                // Fetch Quizzes
-                const { data: quizzesData, error: quizzesError } = await supabase
-                    .from('quizzes')
-                    .select('*')
-                    .eq('course_id', courseId)
-                    .order('order', { ascending: true });
+                // Fetch Quizzes (may not exist — catch silently)
+                try {
+                    const { data: quizzesData, error: quizzesError } = await supabase
+                        .from('quizzes')
+                        .select('*')
+                        .eq('course_id', courseId)
+                        .order('order', { ascending: true });
 
-                if (quizzesError) console.error("Error loading quizzes:", quizzesError);
-                else setQuizzes(quizzesData || []);
+                    if (!quizzesError) {
+                        setQuizzes(quizzesData || []);
+                    }
+                } catch {
+                    // Quizzes table may not exist — that's fine
+                    setQuizzes([]);
+                }
 
                 // Determine active lesson and progress
-                if (currentUser) {
-                    const progress = await getCourseProgress(currentUser.id, courseId);
-                    setCompletedLessons(progress.completed_lessons || []);
-                    setCourseProgress(progress.progress || 0);
+                // FIX: was using undefined `currentUser` — now correctly uses `user`
+                const progress = await getCourseProgress(user.id, courseId);
+                setCompletedLessons(progress.completed_lessons || []);
+                setCourseProgress(progress.progress || 0);
 
-                    // Set initial active lesson
-                    if (lessonsData && lessonsData.length > 0) {
-                        const firstIncomplete = lessonsData.find(
-                            l => !progress.completed_lessons?.includes(l.id)
-                        );
-                        // Also check if incomplete item is a quiz? For simplicity, stick to lessons first.
-                        setActiveLesson(firstIncomplete || lessonsData[0]);
-                    }
-                } else if (lessonsData && lessonsData.length > 0) {
-                    setActiveLesson(lessonsData[0]);
+                // Set initial active lesson to first incomplete, or first lesson
+                if (lessonsData && lessonsData.length > 0) {
+                    const firstIncomplete = lessonsData.find(
+                        l => !progress.completed_lessons?.includes(l.id)
+                    );
+                    setActiveLesson(firstIncomplete || lessonsData[0]);
                 }
 
                 // Auto-expand first module
@@ -81,6 +84,9 @@ const CourseViewer = () => {
                     const firstModuleTitle = getModuleTitle(lessonsData[0].title);
                     if (firstModuleTitle) {
                         setExpandedModules({ [firstModuleTitle]: true });
+                    } else {
+                        // If no module pattern, expand "All Lessons"
+                        setExpandedModules({ 'All Lessons': true });
                     }
                 }
 
@@ -92,7 +98,7 @@ const CourseViewer = () => {
         };
 
         fetchCourseContent();
-    }, [courseId]);
+    }, [courseId, user]);
 
     // Fetch quiz questions when rendering a quiz
     useEffect(() => {
@@ -124,8 +130,7 @@ const CourseViewer = () => {
 
                     // Group options by question
                     const transformedQuestions = questions.map(q => {
-                        const qOptions = options.filter(o => o.question_id === q.id);
-                        // Find correct index
+                        const qOptions = (options || []).filter(o => o.question_id === q.id);
                         const correctIndex = qOptions.findIndex(o => o.is_correct);
 
                         return {
@@ -151,8 +156,8 @@ const CourseViewer = () => {
         if (activeLesson) {
             let moduleTitle = null;
             if (activeLesson.type === 'quiz') {
-                const moduleNum = activeLesson.module_id.replace('module-', '');
-                moduleTitle = `Module ${moduleNum}`;
+                const moduleNum = activeLesson.module_id?.replace('module-', '');
+                moduleTitle = moduleNum ? `Module ${moduleNum}` : null;
             } else {
                 moduleTitle = getModuleTitle(activeLesson.title);
             }
@@ -166,59 +171,59 @@ const CourseViewer = () => {
 
     // Helper to detect if a lesson is a module header
     const isModuleHeader = (title) => {
-        return title?.startsWith('Module ') && title.includes(':');
+        return title?.toLowerCase().startsWith('module ');
     };
 
-    // Get module title from lesson title (e.g., "3.1 Headings" -> "Module 3")
+    // Get module title from lesson title
     const getModuleTitle = (lessonTitle) => {
         if (!lessonTitle) return null;
         if (isModuleHeader(lessonTitle)) {
-            const match = lessonTitle.match(/^Module (\d+)/);
-            return match ? `Module ${match[1]}` : null;
+            return lessonTitle;
         }
-        const match = lessonTitle.match(/^(\d+)\./);
-        return match ? `Module ${match[1]}` : null;
+        return null;
     };
 
-    // Organize lessons and quizzes into modules
+    // Organize lessons and quizzes into modules sequentially based on drag order
     const organizedLessons = () => {
         const modules = {};
+        let currentModuleKey = "Course Introduction"; // Default starting group
 
-        // 1. Process Lessons
+        // 1. Process Lessons in order
         lessons.forEach(lesson => {
             if (isModuleHeader(lesson.title)) {
-                const moduleNum = lesson.title.match(/^Module (\d+)/)?.[1];
-                const currentModule = `Module ${moduleNum}`;
-                if (!modules[currentModule]) {
-                    modules[currentModule] = { header: lesson, items: [] };
+                currentModuleKey = lesson.title;
+                if (!modules[currentModuleKey]) {
+                    modules[currentModuleKey] = { header: lesson, items: [] };
                 } else {
-                    modules[currentModule].header = lesson;
+                    modules[currentModuleKey].header = lesson;
                 }
             } else {
-                const moduleNum = lesson.title.match(/^(\d+)\./)?.[1];
-                const moduleName = moduleNum ? `Module ${moduleNum}` : 'Other';
-                if (!modules[moduleName]) {
-                    modules[moduleName] = { header: null, items: [] };
+                if (!modules[currentModuleKey]) {
+                    modules[currentModuleKey] = { header: null, items: [] };
                 }
-                // Add type 'lesson' to distinguish
-                modules[moduleName].items.push({ ...lesson, type: 'lesson' });
+                modules[currentModuleKey].items.push({ ...lesson, type: 'lesson' });
             }
         });
 
         // 2. Process Quizzes and append to modules
         quizzes.forEach(quiz => {
-            const moduleNum = quiz.module_id.replace('module-', '');
-            const moduleName = `Module ${moduleNum}`;
+            const moduleNum = quiz.module_id?.replace('module-', '');
+            if (!moduleNum) return;
+            
+            // Attempt to find the matching module key
+            const targetModuleKey = Object.keys(modules).find(key => 
+                key.toLowerCase().includes(`module ${moduleNum}:`) || 
+                key.toLowerCase() === `module ${moduleNum}`
+            );
+            const finalKey = targetModuleKey || `Module ${moduleNum}`;
 
-            if (modules[moduleName]) {
-                modules[moduleName].items.push({
+            if (modules[finalKey]) {
+                modules[finalKey].items.push({
                     ...quiz,
                     type: 'quiz',
-                    // Use quiz title, ensure unique ID collision isn't an issue (UUIDs are fine)
                 });
             } else {
-                // If module doesn't exist (e.g. no lessons), create it
-                modules[moduleName] = { header: { title: moduleName }, items: [{ ...quiz, type: 'quiz' }] };
+                modules[finalKey] = { header: { title: finalKey }, items: [{ ...quiz, type: 'quiz' }] };
             }
         });
 
@@ -268,13 +273,10 @@ const CourseViewer = () => {
     };
 
     const getNextItem = () => {
-        // Flatten all items to find next
+        // Flatten all items to find next, skipping module headers
         const allItems = [];
         const modules = organizedLessons();
         Object.values(modules).forEach(m => {
-            // For navigation, we usually skip headers unless they are lessons too.
-            // In current logic, headers are lessons.
-            if (m.header) allItems.push({ ...m.header, type: 'lesson' });
             allItems.push(...m.items);
         });
 
@@ -287,13 +289,21 @@ const CourseViewer = () => {
         const allItems = [];
         const modules = organizedLessons();
         Object.values(modules).forEach(m => {
-            if (m.header) allItems.push({ ...m.header, type: 'lesson' });
             allItems.push(...m.items);
         });
 
         if (!activeLesson || !allItems.length) return null;
         const currentIndex = allItems.findIndex(i => i.id === activeLesson.id);
         return currentIndex > 0 ? allItems[currentIndex - 1] : null;
+    };
+
+    // Format duration for display
+    const formatDuration = (mins) => {
+        if (!mins || mins <= 0) return null;
+        if (mins < 60) return `${mins} min`;
+        const hrs = Math.floor(mins / 60);
+        const rem = mins % 60;
+        return rem > 0 ? `${hrs}h ${rem}m` : `${hrs}h`;
     };
 
     if (loading) return <div className="d-flex justify-content-center align-items-center vh-100"><div className="loader"></div></div>;
@@ -304,10 +314,9 @@ const CourseViewer = () => {
     const currentItemComplete = isLessonComplete(completedLessons, activeLesson?.id);
     const modules = organizedLessons();
 
-    // Flatten items for numbering and progress
+    // Flatten items for numbering and progress (skipping headers)
     const allItems = [];
     Object.values(modules).forEach(m => {
-        if (m.header) allItems.push({ ...m.header, type: 'lesson' });
         allItems.push(...m.items);
     });
     const totalItems = allItems.length;
@@ -347,7 +356,7 @@ const CourseViewer = () => {
                                     borderRadius: '8px',
                                     color: '#fff'
                                 }}
-                                onClick={() => moduleData.header ? handleLessonChange({ ...moduleData.header, type: 'lesson' }) : toggleModule(moduleName)}
+                                onClick={() => toggleModule(moduleName)}
                             >
                                 <div className="d-flex align-items-center">
                                     <i
@@ -366,7 +375,7 @@ const CourseViewer = () => {
                             <div
                                 className="overflow-hidden transition-all"
                                 style={{
-                                    maxHeight: expandedModules[moduleName] ? '1000px' : '0',
+                                    maxHeight: expandedModules[moduleName] ? '2000px' : '0',
                                     transition: 'max-height 0.3s ease-out'
                                 }}
                             >
@@ -394,7 +403,14 @@ const CourseViewer = () => {
                                                     {isQuiz && <i className="fas fa-question-circle me-1 text-warning"></i>}
                                                     {item.title.replace(/^\d+\.\d+\s*/, '')}
                                                 </span>
-                                                {complete && <i className="fas fa-check-circle text-success small"></i>}
+                                                <div className="d-flex align-items-center gap-1">
+                                                    {item.duration_minutes > 0 && (
+                                                        <span className="text-muted small" style={{ fontSize: '0.7rem' }}>
+                                                            {formatDuration(item.duration_minutes)}
+                                                        </span>
+                                                    )}
+                                                    {complete && <i className="fas fa-check-circle text-success small"></i>}
+                                                </div>
                                             </div>
                                         </button>
                                     );
@@ -486,7 +502,7 @@ const CourseViewer = () => {
                                     <li className="breadcrumb-item">{course.title}</li>
                                     <li className="breadcrumb-item active text-info" aria-current="page">
                                         {activeLesson.type === 'quiz'
-                                            ? `Module ${activeLesson.module_id.replace('module-', '')} Assessment`
+                                            ? `Module ${activeLesson.module_id?.replace('module-', '') || '?'} Assessment`
                                             : (isModuleHeader(activeLesson.title) ? activeLesson.title.split(':')[0] : activeLesson.title)}
                                     </li>
                                 </ol>
@@ -494,6 +510,11 @@ const CourseViewer = () => {
 
                             <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
                                 <h2 className="mb-0 fw-bold fs-4 fs-md-2">{activeLesson.title}</h2>
+                                {activeLesson.duration_minutes > 0 && (
+                                    <span className="badge bg-dark border border-secondary text-muted">
+                                        <i className="far fa-clock me-1"></i>{formatDuration(activeLesson.duration_minutes)}
+                                    </span>
+                                )}
                                 {currentItemComplete && (
                                     <span className="badge bg-success">
                                         <i className="fas fa-check me-1"></i> Completed
@@ -518,11 +539,36 @@ const CourseViewer = () => {
                                     isCompleted={currentItemComplete}
                                 />
                             ) : (
-                                <div className="lesson-content typography glass-card p-3 p-md-5">
-                                    <div 
-                                        className="quill-content text-white"
-                                        dangerouslySetInnerHTML={{ __html: activeLesson.content || '<i>No content available.</i>' }}
-                                    />
+                                <div className="lesson-content glass-card p-3 p-md-5">
+                                    {activeLesson.content ? (
+                                        <div 
+                                            className="quill-content"
+                                            dangerouslySetInnerHTML={{ __html: activeLesson.content }}
+                                        />
+                                    ) : (
+                                        <div className="text-center py-5">
+                                            <i className="fas fa-file-alt fs-1 text-secondary mb-3 d-block"></i>
+                                            <p className="text-muted">No content has been added to this lesson yet.</p>
+                                        </div>
+                                    )}
+
+                                    {/* Inline quiz from lesson (has_quiz field) */}
+                                    {activeLesson.has_quiz && activeLesson.quiz_question && (
+                                        <div className="mt-5 pt-4 border-top border-secondary border-opacity-25">
+                                            <h5 className="text-warning mb-3"><i className="fas fa-question-circle me-2"></i>Quick Quiz</h5>
+                                            <QuizSection
+                                                questions={[{
+                                                    id: `inline-${activeLesson.id}`,
+                                                    question: activeLesson.quiz_question,
+                                                    options: activeLesson.quiz_options || [],
+                                                    correct_index: activeLesson.quiz_correct_index || 0
+                                                }]}
+                                                onPass={() => {}}
+                                                isCompleted={false}
+                                                passScore={activeLesson.quiz_pass_score || 70}
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* Mark Complete Button for Non-Quiz */}
                                     <div className="mt-5 pt-4 border-top border-secondary border-opacity-25 d-flex justify-content-center">
@@ -546,8 +592,6 @@ const CourseViewer = () => {
                                     </div>
                                 </div>
                             )}
-
-                            {/* Existing quiz section logic removed/replaced above */}
 
                             {/* Navigation */}
                             <div className="d-flex justify-content-between align-items-center mt-5 mb-5 pb-5 gap-2 flex-wrap">

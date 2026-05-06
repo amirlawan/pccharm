@@ -1312,3 +1312,245 @@ footer::before {
 .activity-feed .border-secondary {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
+
+/* ============================================================
+   QUILL EDITOR — ADMIN DARK MODE
+   Applied via .quill-dark wrapper in admin lesson modal
+   ============================================================ */
+.quill-dark .ql-toolbar.ql-snow {
+    background: #1a1a2e;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px 10px 0 0;
+    padding: 10px 8px;
+    flex-wrap: wrap;
+}
+
+.quill-dark .ql-container.ql-snow {
+    background: #12121f;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    font-size: 0.95rem;
+}
+
+.quill-dark .ql-editor {
+    color: #e2e8f0;
+    min-height: 280px;
+    line-height: 1.75;
+    padding: 16px 20px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.quill-dark .ql-editor.ql-blank::before {
+    color: rgba(255, 255, 255, 0.3);
+    font-style: normal;
+}
+
+/* Toolbar icons and buttons */
+.quill-dark .ql-stroke {
+    stroke: #9ca3af !important;
+}
+.quill-dark .ql-fill {
+    fill: #9ca3af !important;
+}
+.quill-dark .ql-picker-label {
+    color: #9ca3af !important;
+}
+.quill-dark button:hover .ql-stroke,
+.quill-dark button.ql-active .ql-stroke {
+    stroke: #0dcaf0 !important;
+}
+.quill-dark button:hover .ql-fill,
+.quill-dark button.ql-active .ql-fill {
+    fill: #0dcaf0 !important;
+}
+.quill-dark .ql-picker-label:hover,
+.quill-dark .ql-picker-label.ql-active {
+    color: #0dcaf0 !important;
+}
+.quill-dark .ql-picker-label:hover .ql-stroke,
+.quill-dark .ql-picker-label.ql-active .ql-stroke {
+    stroke: #0dcaf0 !important;
+}
+
+/* Picker dropdown menus */
+.quill-dark .ql-picker-options {
+    background: #1e1e35 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    padding: 6px;
+}
+.quill-dark .ql-picker-item {
+    color: #e2e8f0 !important;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+.quill-dark .ql-picker-item:hover {
+    background: rgba(13, 202, 240, 0.15) !important;
+    color: #0dcaf0 !important;
+}
+.quill-dark .ql-picker-item.ql-selected {
+    color: #0dcaf0 !important;
+}
+
+/* Colour picker swatches in dark mode */
+.quill-dark .ql-color-picker .ql-picker-item {
+    border: 1px solid rgba(255,255,255,0.15);
+}
+
+/* Code block in editor */
+.quill-dark .ql-editor pre.ql-syntax {
+    background: #0d1117;
+    color: #e6edf3;
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.88rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+}
+
+/* Blockquote in editor */
+.quill-dark .ql-editor blockquote {
+    border-left: 4px solid #0dcaf0;
+    background: rgba(13, 202, 240, 0.06);
+    padding: 12px 20px;
+    margin: 12px 0;
+    border-radius: 0 8px 8px 0;
+    color: #a5b4fc;
+}
+
+/* ============================================================
+   LESSON CONTENT — STUDENT-FACING (CourseViewer)
+   Styles for dangerouslySetInnerHTML rendered Quill HTML
+   ============================================================ */
+.lesson-content .quill-content {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #e2e8f0;
+}
+
+.lesson-content .quill-content h1,
+.lesson-content .quill-content h2,
+.lesson-content .quill-content h3,
+.lesson-content .quill-content h4,
+.lesson-content .quill-content h5,
+.lesson-content .quill-content h6 {
+    color: #ffffff;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.lesson-content .quill-content h1 { font-size: 2rem; }
+.lesson-content .quill-content h2 { font-size: 1.65rem; }
+.lesson-content .quill-content h3 { font-size: 1.35rem; }
+
+.lesson-content .quill-content p {
+    margin-bottom: 1.1rem;
+    color: #cbd5e1;
+}
+
+.lesson-content .quill-content strong { color: #fff; }
+.lesson-content .quill-content em { color: #93c5fd; }
+.lesson-content .quill-content u { text-decoration-color: rgba(255,255,255,0.4); }
+
+/* Lists */
+.lesson-content .quill-content ul,
+.lesson-content .quill-content ol {
+    padding-left: 1.75rem;
+    margin-bottom: 1.25rem;
+}
+.lesson-content .quill-content li {
+    margin-bottom: 0.4rem;
+    color: #cbd5e1;
+}
+
+/* Blockquote */
+.lesson-content .quill-content blockquote {
+    border-left: 4px solid #0dcaf0;
+    background: rgba(13, 202, 240, 0.07);
+    padding: 14px 20px;
+    margin: 1.5rem 0;
+    border-radius: 0 10px 10px 0;
+    color: #a5b4fc;
+    font-style: italic;
+}
+
+/* Inline code */
+.lesson-content .quill-content code {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f472b6;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* Code block (from Quill) */
+.lesson-content .quill-content pre.ql-syntax,
+.lesson-content .quill-content pre {
+    background: #0d1117;
+    color: #e6edf3;
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 1.5rem 0;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.88rem;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    line-height: 1.65;
+}
+
+/* Syntax highlighting token colours */
+.lesson-content .quill-content .token.keyword { color: #ff79c6; }
+.lesson-content .quill-content .token.string  { color: #f1fa8c; }
+.lesson-content .quill-content .token.comment { color: #6272a4; font-style: italic; }
+.lesson-content .quill-content .token.number  { color: #bd93f9; }
+.lesson-content .quill-content .token.function { color: #50fa7b; }
+
+/* Images embedded in content */
+.lesson-content .quill-content img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin: 1.25rem 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Video embed */
+.lesson-content .quill-content .ql-video {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    margin: 1.25rem 0;
+    border: none;
+}
+
+/* Links */
+.lesson-content .quill-content a {
+    color: #0dcaf0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.lesson-content .quill-content a:hover {
+    color: #67e8f9;
+}
+
+/* Alignment classes from Quill */
+.lesson-content .quill-content .ql-align-center { text-align: center; }
+.lesson-content .quill-content .ql-align-right  { text-align: right; }
+.lesson-content .quill-content .ql-align-justify { text-align: justify; }
+
+/* Indentation */
+.lesson-content .quill-content .ql-indent-1 { padding-left: 2rem; }
+.lesson-content .quill-content .ql-indent-2 { padding-left: 4rem; }
+.lesson-content .quill-content .ql-indent-3 { padding-left: 6rem; }
+
+/* Horizontal rule */
+.lesson-content .quill-content hr {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin: 2rem 0;
+}
