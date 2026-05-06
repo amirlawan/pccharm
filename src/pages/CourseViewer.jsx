@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../lib/AuthContext';
 import QuizSection from '../components/QuizSection';
 import { markLessonComplete, getCourseProgress, isLessonComplete } from '../lib/progressService';
+import confetti from 'canvas-confetti';
 
 const CourseViewer = () => {
     const { courseId } = useParams();
@@ -20,6 +21,10 @@ const CourseViewer = () => {
     const [expandedModules, setExpandedModules] = useState({});
     const [showSuccessToast, setShowSuccessToast] = useState(false);
     const [savingProgress, setSavingProgress] = useState(false);
+    const [focusMode, setFocusMode] = useState(false);
+    const [notesOpen, setNotesOpen] = useState(false);
+    const [lessonNotes, setLessonNotes] = useState('');
+    const [scrollProgress, setScrollProgress] = useState('0%');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -169,6 +174,94 @@ const CourseViewer = () => {
 
     }, [activeLesson?.id]);
 
+    // Load notes when lesson changes
+    useEffect(() => {
+        if (activeLesson && user) {
+            const savedNotes = localStorage.getItem(`notes_${user.id}_${activeLesson.id}`);
+            setLessonNotes(savedNotes || '');
+        }
+    }, [activeLesson, user]);
+
+    // Save notes
+    const handleNotesChange = (e) => {
+        const val = e.target.value;
+        setLessonNotes(val);
+        if (activeLesson && user) {
+            localStorage.setItem(`notes_${user.id}_${activeLesson.id}`, val);
+        }
+    };
+
+    // Scroll Progress logic
+    useEffect(() => {
+        const container = document.getElementById('lesson-content-container');
+        if (!container) return;
+
+        const handleScroll = () => {
+            const totalScroll = container.scrollTop;
+            const windowHeight = container.scrollHeight - container.clientHeight;
+            const scroll = windowHeight > 0 ? `${(totalScroll / windowHeight) * 100}%` : '0%';
+            setScrollProgress(scroll);
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [activeLesson]);
+
+    // Copy Code Utility
+    useEffect(() => {
+        if (!activeLesson || activeLesson.type === 'quiz') return;
+        
+        const timeout = setTimeout(() => {
+            const preBlocks = document.querySelectorAll('.quill-content pre.ql-syntax');
+            
+            preBlocks.forEach(pre => {
+                if (pre.querySelector('.copy-code-btn')) return;
+
+                pre.style.position = 'relative';
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-sm copy-code-btn';
+                btn.innerHTML = '<i class="far fa-copy"></i>';
+                btn.style.position = 'absolute';
+                btn.style.top = '5px';
+                btn.style.right = '5px';
+                btn.style.background = 'rgba(255,255,255,0.1)';
+                btn.style.border = '1px solid rgba(255,255,255,0.2)';
+                btn.style.color = '#fff';
+                btn.style.borderRadius = '4px';
+                btn.style.cursor = 'pointer';
+                btn.style.padding = '2px 8px';
+                btn.style.fontSize = '12px';
+                btn.style.transition = 'all 0.2s';
+                btn.title = "Copy Code";
+
+                btn.onmouseover = () => btn.style.background = 'rgba(255,255,255,0.2)';
+                btn.onmouseout = () => btn.style.background = 'rgba(255,255,255,0.1)';
+
+                btn.onclick = () => {
+                    const clone = pre.cloneNode(true);
+                    const btnInClone = clone.querySelector('.copy-code-btn');
+                    if (btnInClone) clone.removeChild(btnInClone);
+                    
+                    navigator.clipboard.writeText(clone.innerText).then(() => {
+                        btn.innerHTML = '<i class="fas fa-check text-success"></i> Copied!';
+                        btn.style.background = 'rgba(25, 135, 84, 0.2)';
+                        btn.style.borderColor = 'rgba(25, 135, 84, 0.5)';
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="far fa-copy"></i>';
+                            btn.style.background = 'rgba(255,255,255,0.1)';
+                            btn.style.borderColor = 'rgba(255,255,255,0.2)';
+                        }, 2000);
+                    });
+                };
+
+                pre.appendChild(btn);
+            });
+        }, 150);
+
+        return () => clearTimeout(timeout);
+    }, [activeLesson]);
+
     // Helper to detect if a lesson is a module header
     const isModuleHeader = (title) => {
         return title?.toLowerCase().startsWith('module ');
@@ -252,6 +345,14 @@ const CourseViewer = () => {
             setCompletedLessons(result.completedLessons);
             setCourseProgress(result.progress);
             
+            // Trigger Confetti!
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#00e676', '#18ffff', '#e040fb', '#ffcf26']
+            });
+
             setShowSuccessToast(true);
             const contentContainer = document.getElementById('lesson-content-container');
             if (contentContainer) {
@@ -456,20 +557,29 @@ const CourseViewer = () => {
             </div>
 
             {/* Desktop Sidebar */}
-            <div
-                className="glass-card rounded-0 border-end border-secondary border-opacity-25 d-none d-md-flex flex-column"
-                style={{
-                    width: '300px',
-                    flexShrink: 0,
-                    height: '100%',
-                    overflowY: 'auto'
-                }}
-            >
-                {renderSidebarContent()}
-            </div>
+            {!focusMode && (
+                <div
+                    className="glass-card no-hover rounded-0 border-end border-secondary border-opacity-25 d-none d-md-flex flex-column"
+                    style={{
+                        width: '300px',
+                        flexShrink: 0,
+                        height: '100%',
+                        overflowY: 'auto',
+                        transition: 'width 0.3s'
+                    }}
+                >
+                    {renderSidebarContent()}
+                </div>
+            )}
 
             {/* Main Content */}
-            <div id="lesson-content-container" className="flex-grow-1 overflow-auto bg-dark position-relative h-100">
+            <div id="lesson-content-container" className="flex-grow-1 overflow-auto bg-dark position-relative h-100" style={{ scrollBehavior: 'smooth' }}>
+                {/* Scroll Progress Bar */}
+                <div 
+                    className="position-sticky top-0 z-3" 
+                    style={{ height: '3px', width: scrollProgress, background: 'var(--gradient-1)', transition: 'width 0.15s ease-out' }}
+                ></div>
+
                 {/* Toast Notification */}
                 {showSuccessToast && (
                     <div className="position-fixed top-0 start-50 translate-middle-x mt-3 z-3 animate-fade-in" style={{ marginTop: '80px' }}>
@@ -509,17 +619,36 @@ const CourseViewer = () => {
                             </nav>
 
                             <div className="d-flex align-items-center gap-3 mb-4 flex-wrap">
-                                <h2 className="mb-0 fw-bold fs-4 fs-md-2">{activeLesson.title}</h2>
-                                {activeLesson.duration_minutes > 0 && (
-                                    <span className="badge bg-dark border border-secondary text-muted">
-                                        <i className="far fa-clock me-1"></i>{formatDuration(activeLesson.duration_minutes)}
-                                    </span>
-                                )}
-                                {currentItemComplete && (
-                                    <span className="badge bg-success">
-                                        <i className="fas fa-check me-1"></i> Completed
-                                    </span>
-                                )}
+                                <h2 className="mb-0 fw-bold fs-4 fs-md-2 flex-grow-1">{activeLesson.title}</h2>
+                                
+                                <div className="d-flex gap-2 align-items-center flex-wrap">
+                                    {activeLesson.duration_minutes > 0 && (
+                                        <span className="badge bg-dark border border-secondary text-muted d-flex align-items-center">
+                                            <i className="far fa-clock me-1"></i>{formatDuration(activeLesson.duration_minutes)}
+                                        </span>
+                                    )}
+                                    {currentItemComplete && (
+                                        <span className="badge bg-success d-flex align-items-center">
+                                            <i className="fas fa-check me-1"></i> Completed
+                                        </span>
+                                    )}
+                                    <div className="btn-group shadow-sm ms-md-2">
+                                        <button 
+                                            className={`btn btn-sm ${notesOpen ? 'btn-warning text-dark' : 'btn-outline-warning'}`}
+                                            onClick={() => setNotesOpen(!notesOpen)}
+                                            title="Toggle My Notes"
+                                        >
+                                            <i className="fas fa-sticky-note me-1"></i> Notes
+                                        </button>
+                                        <button 
+                                            className={`btn btn-sm d-none d-md-inline-block ${focusMode ? 'btn-info' : 'btn-outline-info'}`}
+                                            onClick={() => setFocusMode(!focusMode)}
+                                            title="Toggle Focus Mode"
+                                        >
+                                            <i className={`fas ${focusMode ? 'fa-compress' : 'fa-expand'}`}></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             {activeLesson.video_url && (
@@ -539,7 +668,7 @@ const CourseViewer = () => {
                                     isCompleted={currentItemComplete}
                                 />
                             ) : (
-                                <div className="lesson-content glass-card p-3 p-md-5">
+                                <div className="lesson-content glass-card no-hover p-3 p-md-5">
                                     {activeLesson.content ? (
                                         <div 
                                             className="quill-content"
@@ -629,6 +758,43 @@ const CourseViewer = () => {
                     )}
                 </div>
             </div>
+
+            {/* Notes Sidebar */}
+            {notesOpen && (
+                <div
+                    className="glass-card no-hover rounded-0 border-start border-secondary border-opacity-25 d-flex flex-column shadow-lg"
+                    style={{
+                        width: '350px',
+                        maxWidth: '85vw',
+                        flexShrink: 0,
+                        height: '100%',
+                        background: 'rgba(10, 17, 40, 0.98)',
+                        position: window.innerWidth < 992 ? 'absolute' : 'relative',
+                        right: 0,
+                        zIndex: 1040,
+                        animation: 'fadeInRight 0.3s ease-out'
+                    }}
+                >
+                    <div className="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <h5 className="mb-0 text-warning"><i className="fas fa-sticky-note me-2"></i>My Notes</h5>
+                        <button className="btn btn-sm text-muted hover-text-white border-0" onClick={() => setNotesOpen(false)}>
+                            <i className="fas fa-times fs-5"></i>
+                        </button>
+                    </div>
+                    <div className="flex-grow-1 p-3 d-flex flex-column bg-dark bg-opacity-50">
+                        <p className="small text-muted mb-3">
+                            <i className="fas fa-info-circle me-1"></i> Notes are automatically saved to your browser for this specific lesson.
+                        </p>
+                        <textarea 
+                            className="form-control bg-dark text-white border-secondary flex-grow-1 p-3 shadow-sm"
+                            value={lessonNotes}
+                            onChange={handleNotesChange}
+                            placeholder="Jot down important concepts, code ideas, or questions here..."
+                            style={{ resize: 'none', lineHeight: '1.6', fontSize: '0.95rem' }}
+                        ></textarea>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

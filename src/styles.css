@@ -482,6 +482,12 @@ section {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
+.no-hover:hover {
+    transform: none !important;
+    box-shadow: inherit !important;
+    border-color: inherit !important;
+}
+
 /* --- Ecosystem Cards (Keep improvements) --- */
 .ecosystem-card {
     padding: 2.5rem;

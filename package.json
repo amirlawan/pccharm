@@ -15,6 +15,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "aos": "^2.3.4",
     "bootstrap": "^5.3.2",
+    "canvas-confetti": "^1.9.4",
     "chart.js": "^4.5.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",

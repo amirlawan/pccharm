@@ -268,7 +268,7 @@ const Dashboard = () => {
                 <div className="row">
                     {/* Sidebar */}
                     <div className="col-lg-3 mb-4">
-                        <div className="glass-card p-4 h-100">
+                        <div className="glass-card no-hover p-4 h-100">
                             <div className="text-center mb-4">
                                 <div style={{
                                     width: '100px', height: '100px', background: 'var(--gradient-1)',
@@ -341,7 +341,7 @@ const Dashboard = () => {
                         </div>
 
                         {/* My Progress / Active Courses */}
-                        <div className="glass-card p-4 mb-4">
+                        <div className="glass-card no-hover p-4 mb-4">
                             <div className="d-flex justify-content-between align-items-center mb-4">
                                 <h4 className="mb-0">My Learning Progress</h4>
                                 <Link to="/academy" className="btn btn-sm btn-outline-light">
@@ -432,7 +432,7 @@ const Dashboard = () => {
             {/* Custom Unenroll Modal Overlay */}
             {courseToUnenroll && (
                 <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(5px)', zIndex: 2000 }}>
-                    <div className="glass-card p-4 p-md-5 m-3 text-center animate-fade-in" style={{ maxWidth: '500px', border: '1px solid rgba(220, 53, 69, 0.3)' }}>
+                    <div className="glass-card no-hover p-4 p-md-5 m-3 text-center animate-fade-in" style={{ maxWidth: '500px', border: '1px solid rgba(220, 53, 69, 0.3)' }}>
                         <div className="icon-circle mx-auto mb-4 bg-danger bg-opacity-25 text-danger" style={{ width: '80px', height: '80px', fontSize: '2.5rem' }}>
                             <i className="fas fa-exclamation-triangle"></i>
                         </div>
