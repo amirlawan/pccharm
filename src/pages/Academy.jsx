@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabaseClient';
 import { enrollUser, getUserEnrollments } from '../lib/enrollmentService';
 import AOS from 'aos';
 import CourseCard from '../components/CourseCard';
-// import { coursesData } from '../data/courses'; // Using DB data now ideally, but keeping import if fallback needed
+import { coursesData } from '../data/courses';
 
 const Academy = () => {
     const [courses, setCourses] = useState([]);
@@ -28,16 +28,16 @@ const Academy = () => {
 
             // 2. Fetch Courses
             let fetchedCourses = [];
-            const { data: coursesData, error: coursesError } = await supabase
+            const { data: dbCoursesData, error: coursesError } = await supabase
                 .from('courses')
                 .select('*');
 
-            if (!coursesError && coursesData) {
-                fetchedCourses = coursesData;
+            if (!coursesError && dbCoursesData) {
+                fetchedCourses = dbCoursesData;
             } else {
                 // Fallback to static if DB empty or error (optional)
                 console.log("Using static data fallback");
-                fetchedCourses = (await import('../data/courses')).coursesData;
+                fetchedCourses = coursesData;
             }
             setCourses(fetchedCourses);
 
