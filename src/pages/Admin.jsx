@@ -1,22 +1,23 @@
-import { useEffect, useState } from 'react';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import ReactQuill from 'react-quill';
+import React, { useEffect, useState, Suspense } from 'react';
 import 'react-quill/dist/quill.snow.css';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../lib/AuthContext';
 import { coursesData } from '../data/courses';
-import {
-    Chart as ChartJS,
-    CategoryScale, LinearScale, PointElement, LineElement,
-    BarElement, Title, Tooltip, Legend, Filler
-} from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
 
-ChartJS.register(
-    CategoryScale, LinearScale, PointElement, LineElement,
-    BarElement, Title, Tooltip, Legend, Filler
-);
+// Lazy load heavy components
+const ReactQuill = React.lazy(() => import('react-quill'));
+const DragDropContext = React.lazy(() => import('@hello-pangea/dnd').then(m => ({ default: m.DragDropContext })));
+const Droppable = React.lazy(() => import('@hello-pangea/dnd').then(m => ({ default: m.Droppable })));
+const Draggable = React.lazy(() => import('@hello-pangea/dnd').then(m => ({ default: m.Draggable })));
+const Line = React.lazy(() => import('react-chartjs-2').then(m => ({ default: m.Line })));
+const Bar = React.lazy(() => import('react-chartjs-2').then(m => ({ default: m.Bar })));
+
+// Register Chart.js dynamically outside the component so it only runs once when the file is parsed, but we actually want it inside a useEffect or just top level async IIFE
+import('chart.js').then((module) => {
+    const { Chart, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler } = module;
+    Chart.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
+});
 
 const Admin = () => {
     const { user, isAdmin } = useAuth();

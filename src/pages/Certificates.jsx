@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Link, useNavigate } from 'react-router-dom';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 import { Helmet } from 'react-helmet-async';
 
 const Certificates = () => {
@@ -93,6 +91,14 @@ const Certificates = () => {
         setToastMessage(`Preparing PDF for ${course.title}...`);
 
         try {
+            // Dynamically import heavy libraries only when download is clicked
+            const [html2canvasModule, jsPDFModule] = await Promise.all([
+                import('html2canvas'),
+                import('jspdf')
+            ]);
+            const html2canvas = html2canvasModule.default;
+            const { jsPDF } = jsPDFModule;
+
             const canvas = await html2canvas(element, {
                 scale: 2,
                 useCORS: true
