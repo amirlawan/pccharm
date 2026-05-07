@@ -11,6 +11,8 @@ const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Login = React.lazy(() => import('./pages/Login'));
 const SignUp = React.lazy(() => import('./pages/SignUp'));
 const Academy = React.lazy(() => import('./pages/Academy'));
+const Blog = React.lazy(() => import('./pages/Blog'));
+const Community = React.lazy(() => import('./pages/Community'));
 const CourseViewer = React.lazy(() => import('./pages/CourseViewer'));
 const Admin = React.lazy(() => import('./pages/Admin'));
 const Certificates = React.lazy(() => import('./pages/Certificates'));
@@ -30,6 +32,8 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/academy" element={<Academy />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/community" element={<Community />} />
           <Route
             path="/dashboard"
             element={

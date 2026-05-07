@@ -40,18 +40,8 @@ const Footer = () => {
                             <h5>Resources</h5>
                             <ul>
                                 <li><Link to="/academy">Academy</Link></li>
-                                <li>
-                                    {isHome ? (
-                                        <a href="#community">Community</a>
-                                    ) : (
-                                        <Link to="/#community">Community</Link>
-                                    )}
-                                </li>
-                                <li>
-                                    <span className="text-muted" style={{cursor: "default"}}>
-                                        Blog <span className="badge bg-secondary ms-1" style={{fontSize:"0.6rem"}}>Soon</span>
-                                    </span>
-                                </li>
+                                <li><Link to="/community">Community</Link></li>
+                                <li><Link to="/blog">Blog</Link></li>
                                 <li><a href="#">Careers</a></li>
                             </ul>
                         </div>
