@@ -593,18 +593,12 @@ const CourseViewer = () => {
                     </div>
                 )}
                 
-                <div className="container py-4 py-md-5 px-3 px-lg-5" style={{ maxWidth: '900px' }}>
+                <div className="container py-4 py-md-5 px-3 px-lg-5 mx-auto" style={{ maxWidth: '800px' }}>
                     {activeLesson ? (
                         <div className="animate-fade-in">
-                            {/* Slim Progress Bar */}
-                            <div className="mb-4">
-                                <div className="d-flex justify-content-between align-items-center mb-2 small text-muted fw-bold">
-                                    <span>Lesson {currentItemIndex} of {totalItems}</span>
-                                    <span>{courseProgress}% complete</span>
-                                </div>
-                                <div className="progress" style={{ height: '4px', background: 'rgba(255,255,255,0.1)' }}>
-                                    <div className="progress-bar bg-info" style={{ width: `${courseProgress}%` }}></div>
-                                </div>
+                            {/* Sleek Lesson Indicator */}
+                            <div className="d-flex justify-content-between align-items-center mb-3 small text-muted fw-bold text-uppercase" style={{ letterSpacing: '1px' }}>
+                                <span>Lesson {currentItemIndex} of {totalItems}</span>
                             </div>
 
                             <nav aria-label="breadcrumb" className="mb-4">
@@ -668,7 +662,7 @@ const CourseViewer = () => {
                                     isCompleted={currentItemComplete}
                                 />
                             ) : (
-                                <div className="lesson-content glass-card no-hover p-3 p-md-5">
+                                <div className="lesson-content p-4 p-md-5 rounded-4 shadow-sm" style={{ background: '#12121f', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     {activeLesson.content ? (
                                         <div 
                                             className="quill-content"
@@ -702,19 +696,20 @@ const CourseViewer = () => {
                                     {/* Mark Complete Button for Non-Quiz */}
                                     <div className="mt-5 pt-4 border-top border-secondary border-opacity-25 d-flex justify-content-center">
                                         {currentItemComplete ? (
-                                            <button className="btn btn-outline-success px-4" disabled>
-                                                <i className="fas fa-check-circle me-2"></i> Completed
-                                            </button>
+                                            <div className="text-success fw-bold d-flex align-items-center bg-success bg-opacity-10 px-4 py-2 rounded-pill">
+                                                <i className="fas fa-check-circle me-2"></i> Lesson Completed
+                                            </div>
                                         ) : (
                                             <button 
-                                                className="btn btn-success px-4 py-2 fs-5 shadow-lg d-flex align-items-center"
+                                                className="btn btn-outline-success rounded-pill px-5 py-2 fw-bold d-flex align-items-center transition-all"
                                                 onClick={handleLessonComplete}
                                                 disabled={savingProgress}
+                                                style={{ letterSpacing: '0.5px' }}
                                             >
                                                 {savingProgress ? (
                                                     <><span className="spinner-border spinner-border-sm me-2"></span> Saving...</>
                                                 ) : (
-                                                    <>Done reading? Mark as Complete <i className="fas fa-arrow-right ms-2"></i></>
+                                                    <>Mark as Complete <i className="fas fa-check ms-2"></i></>
                                                 )}
                                             </button>
                                         )}

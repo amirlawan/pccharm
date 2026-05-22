@@ -17,7 +17,7 @@ const Home = () => {
         const cursorElement = document.querySelector('.cursor');
 
         if (typedTextElement && cursorElement) {
-            const phrases = ["Future.", "Innovation.", "Your Career.", "Success."];
+            const phrases = ["the Future.", "Innovation.", "Your Career.", "Success."];
             let currentPhraseIndex = 0;
             let currentLetterIndex = 0;
             let isDeleting = false;
@@ -161,33 +161,32 @@ const Home = () => {
                 <link rel="canonical" href="https://pccharm.vercel.app/" />
             </Helmet>
             {/* Hero Section */}
-            <section id="home" className="hero">
+            <section id="home" className="hero text-center">
                 <div className="container">
-                    <div className="hero-content" data-aos="fade-up">
-                        <h1 className="mb-3">
-                            Engineer the <span className="typed-text"></span><span className="cursor">&nbsp;</span><br />
-                            With <img src="/icon.png" alt="PcCharm" style={{ width: '50px', height: '50px', verticalAlign: 'middle', marginRight: '10px' }} />PcCharm™
+                    <div className="hero-content mx-auto" data-aos="fade-up" style={{ maxWidth: '900px' }}>
+                        <span className="section-subtitle mb-3" style={{ letterSpacing: '3px' }}>PcCharm Learning Platform</span>
+                        <h1 className="mb-4">
+                            Igniting Minds. Engineering <span className="typed-text"></span><span className="cursor">&nbsp;</span>
                         </h1>
-                        <p className="lead mb-4">
-                            The integrated platform transforming potential into proven tech innovators through
-                            AI-powered learning, real-world projects, and a global ecosystem.
+                        <p className="lead mb-5 mx-auto" style={{ maxWidth: '750px', fontSize: '1.25rem' }}>
+                            Transform your potential into proven expertise. Master AI, Cybersecurity, and Development through real-world projects on our integrated platform.
                         </p>
-                        <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start">
-                            <Link to="/signup" className="btn btn-gradient text-white">Start Your Journey</Link>
-                            <a href="#solutions" className="btn btn-outline-light">Explore Solutions</a>
+                        <div className="d-flex flex-wrap gap-4 justify-content-center mb-5">
+                            <Link to="/signup" className="btn btn-gradient btn-lg text-white px-5 py-3 shadow-lg rounded-pill" style={{ fontSize: '1.1rem' }}>Start Your Journey</Link>
+                            <a href="#solutions" className="btn btn-outline-light btn-lg px-5 py-3 rounded-pill" style={{ fontSize: '1.1rem' }}>Explore Solutions</a>
                         </div>
-                        <div className="brand-pillars mt-5">
+                        <div className="brand-pillars justify-content-center mt-5 pt-4 border-top border-secondary opacity-75">
                             <div className="pillar" data-aos="fade-up" data-aos-delay="300">
                                 <i className="fas fa-brain"></i>
                                 <span>AI-Driven Personalization</span>
                             </div>
-                            <div className="pillar" data-aos="fade-up" data-aos-delay="400">
+                            <div className="pillar mx-md-4" data-aos="fade-up" data-aos-delay="400">
                                 <i className="fas fa-shield-alt"></i>
                                 <span>Cybersecurity Excellence</span>
                             </div>
                             <div className="pillar" data-aos="fade-up" data-aos-delay="500">
                                 <i className="fas fa-globe"></i>
-                                <span>Global Collaboration Network</span>
+                                <span>Global Network</span>
                             </div>
                         </div>
                     </div>
@@ -298,8 +297,9 @@ const Home = () => {
                         </div>
                     </div>
                     <div className="row g-4 justify-content-center">
-                        <div className="col-md-6 col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="300">
-                            <div className="glass-card ecosystem-card w-100">
+                        {/* Active Pillars */}
+                        <div className="col-md-6 col-lg-6 d-flex" data-aos="fade-up" data-aos-delay="300">
+                            <div className="glass-card ecosystem-card w-100 border-teal">
                                 <div className="icon-circle"><i className="fas fa-graduation-cap"></i></div>
                                 <div>
                                     <h5>PcCharm Academy</h5>
@@ -308,44 +308,49 @@ const Home = () => {
                                 <Link to="/academy">Explore Courses <i className="fas fa-arrow-right" aria-hidden="true"></i></Link>
                             </div>
                         </div>
-                        <div className="col-md-6 col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="400">
-                            <div className="glass-card ecosystem-card w-100">
-                                <div className="icon-circle"><i className="fas fa-brain"></i></div>
-                                <div>
-                                    <h5>PcCharm AI Forge</h5>
-                                    <p>Develop, train, and deploy AI models using our powerful tools, datasets, and cloud infrastructure.</p>
-                                </div>
-                                <a href="#">Enter the Forge <i className="fas fa-arrow-right" aria-hidden="true"></i></a>
-                            </div>
-                        </div>
-                        <div className="col-md-6 col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="500">
-                            <div className="glass-card ecosystem-card w-100">
-                                <div className="icon-circle"><i className="fas fa-shield-alt"></i></div>
-                                <div>
-                                    <h5>PcCharm SecLab</h5>
-                                    <p>Hone your cybersecurity skills in hyper-realistic simulated environments and capture-the-flag challenges.</p>
-                                </div>
-                                <a href="#">Access SecLab <i className="fas fa-arrow-right" aria-hidden="true"></i></a>
-                            </div>
-                        </div>
-                        <div className="col-md-6 col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="600">
-                            <div className="glass-card ecosystem-card w-100">
+                        <div className="col-md-6 col-lg-6 d-flex" data-aos="fade-up" data-aos-delay="400">
+                            <div className="glass-card ecosystem-card w-100 border-teal">
                                 <div className="icon-circle"><i className="fas fa-users"></i></div>
                                 <div>
                                     <h5>PcCharm Connect</h5>
                                     <p>Collaborate on projects, find mentors, join special interest groups, and network globally.</p>
                                 </div>
-                                <a href="#">Join the Network <i className="fas fa-arrow-right" aria-hidden="true"></i></a>
+                                <Link to="/connect">Join the Network <i className="fas fa-arrow-right" aria-hidden="true"></i></Link>
+                            </div>
+                        </div>
+
+                        {/* Upcoming Pillars */}
+                        <div className="col-md-6 col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="500">
+                            <div className="glass-card ecosystem-card w-100 position-relative">
+                                <span className="badge bg-warning text-dark position-absolute top-0 end-0 m-3">Coming Soon</span>
+                                <div className="icon-circle opacity-75"><i className="fas fa-brain"></i></div>
+                                <div>
+                                    <h5 className="opacity-75">PcCharm AI Forge</h5>
+                                    <p className="opacity-75">Develop, train, and deploy AI models using our powerful tools, datasets, and cloud infrastructure.</p>
+                                </div>
+                                <Link to="/aiforge" className="text-muted">See the Vision <i className="fas fa-arrow-right" aria-hidden="true"></i></Link>
+                            </div>
+                        </div>
+                        <div className="col-md-6 col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="600">
+                            <div className="glass-card ecosystem-card w-100 position-relative">
+                                <span className="badge bg-warning text-dark position-absolute top-0 end-0 m-3">Coming Soon</span>
+                                <div className="icon-circle opacity-75"><i className="fas fa-shield-alt"></i></div>
+                                <div>
+                                    <h5 className="opacity-75">PcCharm SecLab</h5>
+                                    <p className="opacity-75">Hone your cybersecurity skills in hyper-realistic simulated environments and capture-the-flag challenges.</p>
+                                </div>
+                                <Link to="/seclab" className="text-muted">See the Vision <i className="fas fa-arrow-right" aria-hidden="true"></i></Link>
                             </div>
                         </div>
                         <div className="col-md-6 col-lg-4 d-flex" data-aos="fade-up" data-aos-delay="700">
-                            <div className="glass-card ecosystem-card w-100">
-                                <div className="icon-circle"><i className="fas fa-briefcase"></i></div>
+                            <div className="glass-card ecosystem-card w-100 position-relative">
+                                <span className="badge bg-warning text-dark position-absolute top-0 end-0 m-3">Coming Soon</span>
+                                <div className="icon-circle opacity-75"><i className="fas fa-briefcase"></i></div>
                                 <div>
-                                    <h5>PcCharm Pro Services</h5>
-                                    <p>Leverage our expert talent and platform capabilities for your enterprise projects and solutions.</p>
+                                    <h5 className="opacity-75">PcCharm Pro Services</h5>
+                                    <p className="opacity-75">Leverage our expert talent and platform capabilities for your enterprise projects and solutions.</p>
                                 </div>
-                                <a href="#">Enterprise Solutions <i className="fas fa-arrow-right" aria-hidden="true"></i></a>
+                                <Link to="/proservices" className="text-muted">See the Vision <i className="fas fa-arrow-right" aria-hidden="true"></i></Link>
                             </div>
                         </div>
                     </div>

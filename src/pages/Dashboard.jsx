@@ -355,9 +355,11 @@ const Dashboard = () => {
                                 <div className="row g-3">
                                     {enrolledCourses.map(course => (
                                         <div key={course.id} className="col-md-6">
-                                            <div className="p-3 border border-secondary border-opacity-25 rounded bg-dark bg-opacity-25">
-                                                <div className="d-flex align-items-center mb-3">
-                                                    <i className={`${course.icon || 'fas fa-book'} fs-4 text-info me-3`}></i>
+                                            <div className="p-4 border border-secondary border-opacity-10 rounded-4 shadow-sm" style={{ background: '#12121f' }}>
+                                                <div className="d-flex align-items-center mb-4">
+                                                    <div className="d-flex align-items-center justify-content-center rounded-circle bg-info bg-opacity-10 text-info me-3" style={{ width: '48px', height: '48px' }}>
+                                                        <i className={`${course.icon || 'fas fa-book'} fs-5`}></i>
+                                                    </div>
                                                     <div className="flex-grow-1">
                                                         <h6 className="mb-0">{course.title}</h6>
                                                         <small className="text-muted">{course.category}</small>

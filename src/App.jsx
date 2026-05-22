@@ -13,6 +13,10 @@ const SignUp = React.lazy(() => import('./pages/SignUp'));
 const Academy = React.lazy(() => import('./pages/Academy'));
 const Blog = React.lazy(() => import('./pages/Blog'));
 const Community = React.lazy(() => import('./pages/Community'));
+const AIForge = React.lazy(() => import('./pages/AIForge'));
+const SecLab = React.lazy(() => import('./pages/SecLab'));
+const Connect = React.lazy(() => import('./pages/Connect'));
+const ProServices = React.lazy(() => import('./pages/ProServices'));
 const CourseViewer = React.lazy(() => import('./pages/CourseViewer'));
 const Admin = React.lazy(() => import('./pages/Admin'));
 const Certificates = React.lazy(() => import('./pages/Certificates'));
@@ -34,6 +38,10 @@ function AppContent() {
           <Route path="/academy" element={<Academy />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/community" element={<Community />} />
+          <Route path="/aiforge" element={<AIForge />} />
+          <Route path="/seclab" element={<SecLab />} />
+          <Route path="/connect" element={<Connect />} />
+          <Route path="/proservices" element={<ProServices />} />
           <Route
             path="/dashboard"
             element={
