@@ -5,9 +5,17 @@ import AOS from 'aos';
 
 const Home = () => {
     useEffect(() => {
-        // Re-initialize AOS on mount
-        AOS.init({ duration: 800, easing: 'ease-in-out', once: true, offset: 100 });
+        // Only refresh AOS, do not re-init (already initialized globally in main.jsx or index.html)
         AOS.refresh();
+
+        // Hash scroll: when navigating from another page with hash (e.g. /#ecosystem)
+        const hash = window.location.hash;
+        if (hash) {
+            setTimeout(() => {
+                const el = document.querySelector(hash);
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        }
 
         let typingTimeoutId;
         let counterIntervals = [];
@@ -86,10 +94,9 @@ const Home = () => {
                 if (start >= target) {
                     start = target;
                     clearInterval(timer);
-                    counterElement.textContent = Math.floor(start / 1000).toLocaleString() + 'K+';
-                } else {
-                    counterElement.textContent = Math.floor(start / 1000).toLocaleString() + 'K';
                 }
+                const displayVal = Math.floor(start / 1000);
+                counterElement.textContent = displayVal.toLocaleString() + 'K+';
             }, frameDuration);
             counterIntervals.push(timer);
         };
@@ -427,7 +434,7 @@ const Home = () => {
                     <div className="row text-center gy-4">
                         <div className="col-md-4" data-aos="fade-up" data-aos-delay="300">
                             <div className="stat-item">
-                                <span className="stat-number counter-k" data-count="10">0K+</span>
+                                <span className="stat-number counter-k" data-count="10">0</span>
                                 <span className="stat-label d-block">Successful Learners</span>
                             </div>
                         </div>

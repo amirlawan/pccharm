@@ -1,11 +1,38 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import AOS from 'aos';
+import { supabase } from '../lib/supabaseClient';
 
 const AIForge = () => {
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
+
     useEffect(() => {
-        AOS.init({ duration: 800, easing: 'ease-in-out', once: true, offset: 100 });
+        AOS.refresh();
     }, []);
+
+    const handleWaitlistSubmit = async (e) => {
+        e.preventDefault();
+        if (!email.trim()) return;
+        setLoading(true);
+        setErrorMsg('');
+
+        try {
+            const { error } = await supabase
+                .from('course_waitlist')
+                .insert([{ email: email.trim(), course_id: 'aiforge' }]);
+
+            if (error) throw error;
+            setSubmitted(true);
+            setEmail('');
+        } catch (err) {
+            setErrorMsg(err.message || 'Failed to join waitlist. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <main style={{ paddingTop: '100px', minHeight: '100vh', background: 'var(--primary-dark)' }}>
@@ -26,10 +53,35 @@ const AIForge = () => {
                         <h3>The Forge is Heating Up</h3>
                         <p>We are currently building guides, tutorials, and practical projects using GPT-4, Claude, and more.</p>
                         <div className="mt-4">
-                            <div className="input-group mx-auto" style={{ maxWidth: '400px' }}>
-                                <input type="email" className="form-control" placeholder="Enter your email" aria-label="Email for waitlist" />
-                                <button className="btn btn-gradient text-white" type="button" style={{ borderRadius: '0 50px 50px 0' }}>Join Waitlist</button>
-                            </div>
+                            {submitted ? (
+                                <div className="alert alert-success mx-auto" style={{ maxWidth: '400px' }}>
+                                    <i className="fas fa-check-circle me-2"></i>You're on the list! We'll keep you updated.
+                                </div>
+                            ) : (
+                                <form onSubmit={handleWaitlistSubmit}>
+                                    <div className="input-group mx-auto" style={{ maxWidth: '400px' }}>
+                                        <input 
+                                            type="email" 
+                                            className="form-control" 
+                                            placeholder="Enter your email" 
+                                            aria-label="Email for waitlist" 
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            required
+                                            disabled={loading}
+                                        />
+                                        <button 
+                                            className="btn btn-gradient text-white" 
+                                            type="submit" 
+                                            style={{ borderRadius: '0 50px 50px 0' }}
+                                            disabled={loading}
+                                        >
+                                            {loading ? 'Joining...' : 'Join Waitlist'}
+                                        </button>
+                                    </div>
+                                    {errorMsg && <p className="text-danger mt-2 small">{errorMsg}</p>}
+                                </form>
+                            )}
                             <p className="text-muted mt-3 small">Be the first to know when AI Forge launches in 2026.</p>
                         </div>
                     </div>

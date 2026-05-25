@@ -53,7 +53,12 @@ export const AuthProvider = ({ children }) => {
                 }
             } catch (err) {
                 console.warn('Auth check failed or timed out:', err.message);
-                await supabase.auth.signOut(); // clears corrupted localStorage token
+                // Clear state immediately and trigger background signout to clear keys safely
+                try {
+                    supabase.auth.signOut().catch(e => console.warn('Background signOut failed:', e.message));
+                } catch (e) {
+                    console.warn('SignOut call failed:', e.message);
+                }
                 currentUser = null;
                 currentIsAdmin = false;
             } finally {

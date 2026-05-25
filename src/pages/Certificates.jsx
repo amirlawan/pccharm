@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { useAuth } from '../lib/AuthContext';
 
 const Certificates = () => {
-    const [user, setUser] = useState(null);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const { user, isAdmin, loading: authLoading } = useAuth();
     const [completedCourses, setCompletedCourses] = useState([]);
     const [loading, setLoading] = useState(true);
     const [toastMessage, setToastMessage] = useState('');
@@ -13,24 +13,14 @@ const Certificates = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (authLoading) return;
+        
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
         const fetchCertificates = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                navigate('/login');
-                return;
-            }
-            setUser(user);
-
-            // Check if admin
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('is_admin')
-                .eq('id', user.id)
-                .single();
-
-            const isUserAdmin = profile?.is_admin || false;
-            setIsAdmin(isUserAdmin);
-
             // Fetch Enrollments
             try {
                 const { data, error } = await supabase
@@ -57,12 +47,12 @@ const Certificates = () => {
                     }));
 
                     // Exception for admin: show all as completed
-                    if (!isUserAdmin) {
+                    if (!isAdmin) {
                         certificates = certificates.filter(c => c.progress >= 100);
                     }
 
                     setCompletedCourses(certificates);
-                } else if (isUserAdmin) {
+                } else if (isAdmin) {
                     // Provide mock certificates for admin testing if they haven't enrolled in anything
                     const { data: mockCourses } = await supabase.from('courses').select('*').limit(3);
                     if (mockCourses) {
@@ -82,7 +72,7 @@ const Certificates = () => {
         };
 
         fetchCertificates();
-    }, [navigate]);
+    }, [navigate, user, authLoading, isAdmin]);
 
     const handleDownloadClick = async (course) => {
         const element = document.getElementById(`certificate-${course.id}`);

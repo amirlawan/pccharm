@@ -1,16 +1,42 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import AOS from 'aos';
+import { supabase } from '../lib/supabaseClient';
 
 const Blog = () => {
+    const [nlEmail, setNlEmail] = useState('');
+    const [nlLoading, setNlLoading] = useState(false);
+    const [nlSubmitted, setNlSubmitted] = useState(false);
+    const [nlError, setNlError] = useState('');
+
     useEffect(() => {
-        AOS.init({ duration: 800, easing: 'ease-in-out', once: true, offset: 100 });
         AOS.refresh();
         
         // Scroll to top on mount
         window.scrollTo(0, 0);
     }, []);
+
+    const handleNewsletterSubmit = async (e) => {
+        e.preventDefault();
+        if (!nlEmail.trim()) return;
+        setNlLoading(true);
+        setNlError('');
+
+        try {
+            const { error } = await supabase
+                .from('course_waitlist')
+                .insert([{ email: nlEmail.trim(), course_id: 'blog_newsletter' }]);
+
+            if (error) throw error;
+            setNlSubmitted(true);
+            setNlEmail('');
+        } catch (err) {
+            setNlError(err.message || 'Something went wrong. Please try again.');
+        } finally {
+            setNlLoading(false);
+        }
+    };
 
     const blogPosts = [
         {
@@ -183,10 +209,29 @@ const Blog = () => {
                     <div className="glass-card p-5" data-aos="zoom-in" style={{ maxWidth: '800px', margin: '0 auto', borderRadius: '24px' }}>
                         <h3 className="mb-3">Never Miss an Update</h3>
                         <p className="text-muted mb-4">Get the latest articles, tutorials, and industry news delivered straight to your inbox.</p>
-                        <form className="d-flex flex-column flex-md-row gap-3 justify-content-center" onSubmit={(e) => e.preventDefault()}>
-                            <input type="email" className="form-control bg-dark text-light border-secondary" placeholder="Enter your email address" style={{ maxWidth: '300px' }} required />
-                            <button type="submit" className="btn btn-gradient text-white px-4">Subscribe Now</button>
-                        </form>
+                        {nlSubmitted ? (
+                            <div className="d-flex align-items-center justify-content-center gap-2" style={{ color: '#4ade80' }}>
+                                <i className="fas fa-check-circle"></i>
+                                <span>You're subscribed! Stay tuned for updates.</span>
+                            </div>
+                        ) : (
+                            <form className="d-flex flex-column flex-md-row gap-3 justify-content-center" onSubmit={handleNewsletterSubmit}>
+                                <input 
+                                    type="email" 
+                                    className="form-control bg-dark text-light border-secondary" 
+                                    placeholder="Enter your email address" 
+                                    style={{ maxWidth: '300px' }} 
+                                    value={nlEmail}
+                                    onChange={(e) => setNlEmail(e.target.value)}
+                                    required 
+                                    disabled={nlLoading}
+                                />
+                                <button type="submit" className="btn btn-gradient text-white px-4" disabled={nlLoading}>
+                                    {nlLoading ? 'Subscribing...' : 'Subscribe Now'}
+                                </button>
+                                {nlError && <p className="text-danger small mt-2 w-100">{nlError}</p>}
+                            </form>
+                        )}
                     </div>
                 </div>
             </section>

@@ -29,8 +29,21 @@ function AppContent() {
 
   return (
     <>
-      <Navbar />
-      <Suspense fallback={<div className="d-flex justify-content-center align-items-center" style={{ height: '100vh', background: 'var(--bg-dark)' }}><div className="spinner-border text-primary" role="status"><span className="visually-hidden">Loading...</span></div></div>}>
+      {!isLearningMode && !isAdminMode && <Navbar />}
+      <Suspense fallback={
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          background: 'linear-gradient(135deg, #0a1128, #001f54)',
+          gap: '1.5rem'
+        }}>
+          <img src="/icon.png" alt="PcCharm" style={{ width: 60, height: 60, animation: 'pulse 2s infinite ease-in-out' }} />
+          <div className="loader"></div>
+        </div>
+      }>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

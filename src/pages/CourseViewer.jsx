@@ -5,10 +5,11 @@ import { useAuth } from '../lib/AuthContext';
 import QuizSection from '../components/QuizSection';
 import { markLessonComplete, getCourseProgress, isLessonComplete } from '../lib/progressService';
 import confetti from 'canvas-confetti';
+import DOMPurify from 'dompurify';
 
 const CourseViewer = () => {
     const { courseId } = useParams();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const [course, setCourse] = useState(null);
     const [lessons, setLessons] = useState([]);
     const [quizzes, setQuizzes] = useState([]);
@@ -28,11 +29,16 @@ const CourseViewer = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (authLoading) return;
+
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
         const fetchCourseContent = async () => {
             setLoading(true);
             try {
-                if (!user) return;
-
                 // Fetch Course Info
                 const { data: courseData, error: courseError } = await supabase
                     .from('courses')
@@ -103,7 +109,7 @@ const CourseViewer = () => {
         };
 
         fetchCourseContent();
-    }, [courseId, user]);
+    }, [courseId, user, authLoading, navigate]);
 
     // Fetch quiz questions when rendering a quiz
     useEffect(() => {
@@ -530,28 +536,38 @@ const CourseViewer = () => {
 
     return (
         <div className="d-flex flex-column flex-md-row w-100 overflow-hidden" style={{ height: '100vh', paddingTop: '70px' }}>
-            {/* Mobile Top Bar Toggle */}
-            <div className="d-md-none bg-dark border-bottom border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center z-3 shadow-sm">
-                <span className="fw-bold text-info"><i className="fas fa-list me-2"></i>Lessons</span>
+            {/* Mobile Top Bar with intuitive course title and map button */}
+            <div className="d-md-none bg-dark border-bottom border-secondary border-opacity-25 p-3 d-flex justify-content-between align-items-center z-3 shadow-sm" style={{ flexShrink: 0 }}>
+                <div className="d-flex align-items-center gap-2">
+                    <Link to="/dashboard" className="text-muted text-decoration-none me-2 hover-text-white">
+                        <i className="fas fa-arrow-left"></i>
+                    </Link>
+                    <span className="fw-bold text-info text-truncate" style={{ maxWidth: '180px' }} title={course?.title}>{course?.title}</span>
+                </div>
                 <button 
-                    className="btn btn-outline-light btn-sm"
-                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="btn btn-gradient btn-sm px-3 py-1.5 rounded-pill d-flex align-items-center gap-1 shadow-sm"
+                    onClick={() => setSidebarOpen(true)}
+                    style={{ fontWeight: '600', fontSize: '0.85rem' }}
                 >
-                    {sidebarOpen ? 'Close' : 'Expand'} <i className={`fas ${sidebarOpen ? 'fa-chevron-up' : 'fa-chevron-down'} ms-1`}></i>
+                    <i className="fas fa-map-marked-alt"></i> Course Map
                 </button>
             </div>
 
-            {/* Mobile Sidebar (Collapsible inline) */}
+            {/* Mobile Sidebar Backdrop Overlay */}
             <div 
-                className={`d-md-none bg-dark border-bottom border-secondary border-opacity-25 overflow-hidden transition-all z-2 ${sidebarOpen ? 'd-block' : 'd-none'}`}
-                style={{
-                    maxHeight: sidebarOpen ? '50vh' : '0',
-                    overflowY: 'auto',
-                    transition: 'max-height 0.3s ease-out',
-                    position: 'relative'
-                }}
-            >
-                <div className="w-100 flex-column d-flex">
+                className={`mobile-sidebar-backdrop d-md-none ${sidebarOpen ? 'show' : ''}`}
+                onClick={() => setSidebarOpen(false)}
+            ></div>
+
+            {/* Mobile Sidebar Slide-out Drawer */}
+            <div className={`mobile-sidebar-drawer d-md-none ${sidebarOpen ? 'open' : ''}`}>
+                <div className="d-flex justify-content-between align-items-center px-4 pb-3 border-bottom border-secondary border-opacity-25">
+                    <span className="fw-bold text-info"><i className="fas fa-map-marked-alt me-2"></i>Course Map</span>
+                    <button className="btn btn-sm btn-outline-light border-0 text-white" onClick={() => setSidebarOpen(false)}>
+                        <i className="fas fa-times fs-5"></i>
+                    </button>
+                </div>
+                <div className="flex-grow-1 overflow-auto">
                     {renderSidebarContent()}
                 </div>
             </div>
@@ -666,7 +682,7 @@ const CourseViewer = () => {
                                     {activeLesson.content ? (
                                         <div 
                                             className="quill-content"
-                                            dangerouslySetInnerHTML={{ __html: activeLesson.content }}
+                                            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(activeLesson.content) }}
                                         />
                                     ) : (
                                         <div className="text-center py-5">

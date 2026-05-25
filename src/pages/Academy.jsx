@@ -6,52 +6,67 @@ import { enrollUser, getUserEnrollments } from '../lib/enrollmentService';
 import AOS from 'aos';
 import CourseCard from '../components/CourseCard';
 import { coursesData } from '../data/courses';
+import { useAuth } from '../lib/AuthContext';
 
 const Academy = () => {
+    const { user, loading: authLoading } = useAuth();
     const [courses, setCourses] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [sortOrder, setSortOrder] = useState('asc');
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState(null);
     const [enrolledCourseIds, setEnrolledCourseIds] = useState([]);
 
     const navigate = useNavigate();
 
+    // 1. Fetch Courses on Mount
     useEffect(() => {
         AOS.refresh();
 
-        const initData = async () => {
-            // 1. Get Current User
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-
-            // 2. Fetch Courses
+        const fetchCourses = async () => {
             let fetchedCourses = [];
-            const { data: dbCoursesData, error: coursesError } = await supabase
-                .from('courses')
-                .select('*');
+            try {
+                const { data: dbCoursesData, error: coursesError } = await supabase
+                    .from('courses')
+                    .select('*');
 
-            if (!coursesError && dbCoursesData) {
-                fetchedCourses = dbCoursesData;
-            } else {
-                // Fallback to static if DB empty or error (optional)
-                console.log("Using static data fallback");
+                if (!coursesError && dbCoursesData) {
+                    fetchedCourses = dbCoursesData;
+                } else {
+                    console.log("Using static data fallback");
+                    fetchedCourses = coursesData;
+                }
+            } catch (err) {
+                console.log("Using static data fallback due to catch", err);
                 fetchedCourses = coursesData;
             }
             setCourses(fetchedCourses);
-
-            // 3. Fetch Enrollments if user logged in
-            if (user) {
-                const { data: enrollmentIds } = await getUserEnrollments(user.id);
-                setEnrolledCourseIds(enrollmentIds);
+            if (!user && !authLoading) {
+                setLoading(false);
             }
+        };
 
+        fetchCourses();
+    }, [user, authLoading]);
+
+    // 2. Fetch Enrollments once auth has finished loading
+    useEffect(() => {
+        const fetchEnrollments = async () => {
+            if (authLoading) return;
+            
+            if (user) {
+                try {
+                    const { data: enrollmentIds } = await getUserEnrollments(user.id);
+                    setEnrolledCourseIds(enrollmentIds || []);
+                } catch (err) {
+                    console.error('Failed to load enrollments:', err);
+                }
+            }
             setLoading(false);
         };
 
-        initData();
-    }, []);
+        fetchEnrollments();
+    }, [user, authLoading]);
 
     const handleEnroll = async (courseId) => {
         if (!user) {

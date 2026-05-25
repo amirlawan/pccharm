@@ -46,7 +46,7 @@ const Navbar = () => {
                             <a className="nav-link dropdown-toggle" href="#" id="upcomingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style={{ cursor: 'pointer' }}>
                                 Upcoming
                             </a>
-                            <ul className="dropdown-menu dropdown-menu-dark" aria-labelledby="upcomingDropdown" style={{ backgroundColor: 'rgba(10, 17, 40, 0.95)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                            <ul className="dropdown-menu dropdown-menu-dark" aria-label="Upcoming products" style={{ backgroundColor: 'rgba(10, 17, 40, 0.95)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
                                 <li><Link className="dropdown-item text-muted" to="/aiforge">PcCharm AI Forge</Link></li>
                                 <li><Link className="dropdown-item text-muted" to="/seclab">PcCharm SecLab</Link></li>
                                 <li><Link className="dropdown-item text-muted" to="/proservices">PcCharm Pro Services</Link></li>
