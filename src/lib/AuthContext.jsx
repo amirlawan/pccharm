@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                if (event === 'SIGNED_IN' && session?.user) {
+                if ((event === 'SIGNED_IN' || event === 'PASSWORD_RECOVERY') && session?.user) {
                     let admin = false;
                     try {
                         const { data } = await supabase
@@ -84,8 +84,13 @@ export const AuthProvider = ({ children }) => {
                         admin = data?.is_admin === true;
                     } catch { /* default false */ }
                     setState({ user: session.user, isAdmin: admin, loading: false });
+
+                    if (event === 'PASSWORD_RECOVERY') {
+                        sessionStorage.setItem('isPasswordRecovery', 'true');
+                    }
                 } else if (event === 'SIGNED_OUT') {
                     setState({ user: null, isAdmin: false, loading: false });
+                    sessionStorage.removeItem('isPasswordRecovery');
                 }
             }
         );

@@ -21,15 +21,17 @@ const CourseViewer = React.lazy(() => import('./pages/CourseViewer'));
 const Admin = React.lazy(() => import('./pages/Admin'));
 const Certificates = React.lazy(() => import('./pages/Certificates'));
 const NotFound = React.lazy(() => import('./pages/NotFound'));
+const OAuthConsent = React.lazy(() => import('./pages/OAuthConsent'));
 
 function AppContent() {
   const location = useLocation();
   const isLearningMode = location.pathname.startsWith('/learn');
   const isAdminMode = location.pathname.startsWith('/admin');
+  const isOAuthMode = location.pathname.startsWith('/oauth');
 
   return (
     <>
-      {!isLearningMode && !isAdminMode && <Navbar />}
+      {!isLearningMode && !isAdminMode && !isOAuthMode && <Navbar />}
       <Suspense fallback={
         <div style={{
           display: 'flex',
@@ -87,10 +89,11 @@ function AppContent() {
               </ProtectedRoute>
             }
           />
+          <Route path="/oauth/consent" element={<OAuthConsent />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
-      {!isLearningMode && !isAdminMode && <Footer />}
+      {!isLearningMode && !isAdminMode && !isOAuthMode && <Footer />}
     </>
   );
 }

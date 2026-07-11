@@ -1,0 +1,15 @@
+# PcCharm Robots.txt
+# https://pccharm.vercel.app
+
+User-agent: *
+Allow: /
+
+# Block authenticated/private pages from crawling
+Disallow: /dashboard
+Disallow: /certificates
+Disallow: /learn/
+Disallow: /admin
+Disallow: /oauth/
+
+# Sitemap location
+Sitemap: https://pccharm.vercel.app/sitemap.xml

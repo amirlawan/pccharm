@@ -3,6 +3,14 @@
 -- Run this in your Supabase SQL Editor to enforce server-side security.
 -- =======================================================================
 
+-- 0. Ensure the course_waitlist table exists
+CREATE TABLE IF NOT EXISTS public.course_waitlist (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  email text NOT NULL,
+  course_id text, -- nullable (e.g., newsletter subscriptions don't have a course)
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
 -- 1. Enable RLS on all administrative tables
 ALTER TABLE public.courses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.lessons ENABLE ROW LEVEL SECURITY;
@@ -28,14 +36,17 @@ CREATE POLICY "Courses are viewable by everyone."
   ON public.courses FOR SELECT 
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can insert courses" ON public.courses;
 CREATE POLICY "Admins can insert courses" 
   ON public.courses FOR INSERT 
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update courses" ON public.courses;
 CREATE POLICY "Admins can update courses" 
   ON public.courses FOR UPDATE 
   USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete courses" ON public.courses;
 CREATE POLICY "Admins can delete courses" 
   ON public.courses FOR DELETE 
   USING (public.is_admin());
@@ -46,14 +57,17 @@ CREATE POLICY "Lessons are viewable by everyone."
   ON public.lessons FOR SELECT 
   USING (true);
 
+DROP POLICY IF EXISTS "Admins can insert lessons" ON public.lessons;
 CREATE POLICY "Admins can insert lessons" 
   ON public.lessons FOR INSERT 
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update lessons" ON public.lessons;
 CREATE POLICY "Admins can update lessons" 
   ON public.lessons FOR UPDATE 
   USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete lessons" ON public.lessons;
 CREATE POLICY "Admins can delete lessons" 
   ON public.lessons FOR DELETE 
   USING (public.is_admin());
@@ -64,14 +78,17 @@ CREATE POLICY "Announcements are viewable by everyone"
   ON public.announcements FOR SELECT 
   USING (is_active = true OR public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can insert announcements" ON public.announcements;
 CREATE POLICY "Admins can insert announcements" 
   ON public.announcements FOR INSERT 
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update announcements" ON public.announcements;
 CREATE POLICY "Admins can update announcements" 
   ON public.announcements FOR UPDATE 
   USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete announcements" ON public.announcements;
 CREATE POLICY "Admins can delete announcements" 
   ON public.announcements FOR DELETE 
   USING (public.is_admin());
@@ -86,14 +103,17 @@ CREATE POLICY "Notifications are viewable by target users"
     OR public.is_admin()
   );
 
+DROP POLICY IF EXISTS "Admins can insert notifications" ON public.notifications;
 CREATE POLICY "Admins can insert notifications" 
   ON public.notifications FOR INSERT 
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can update notifications" ON public.notifications;
 CREATE POLICY "Admins can update notifications" 
   ON public.notifications FOR UPDATE 
   USING (public.is_admin());
 
+DROP POLICY IF EXISTS "Admins can delete notifications" ON public.notifications;
 CREATE POLICY "Admins can delete notifications" 
   ON public.notifications FOR DELETE 
   USING (public.is_admin());

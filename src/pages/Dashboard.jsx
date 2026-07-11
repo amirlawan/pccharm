@@ -45,6 +45,13 @@ const Dashboard = () => {
     const [avatarModalOpen, setAvatarModalOpen] = useState(false);
     const [updatingAvatar, setUpdatingAvatar] = useState(false);
     
+    // Password reset modal states
+    const [recoveryModalOpen, setRecoveryModalOpen] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [updatingPassword, setUpdatingPassword] = useState(false);
+    const [passwordError, setPasswordError] = useState('');
+    
     // Dashboard sub-tab switcher state
     const [activeSubTab, setActiveSubTab] = useState('learning'); // 'learning', 'analytics', 'milestones'
 
@@ -225,6 +232,12 @@ const Dashboard = () => {
         return () => { supabase.removeChannel(channel); };
     }, [user]);
 
+    useEffect(() => {
+        if (user && sessionStorage.getItem('isPasswordRecovery') === 'true') {
+            setRecoveryModalOpen(true);
+        }
+    }, [user]);
+
     const handleLogout = async () => {
         await supabase.auth.signOut();
         navigate('/');
@@ -295,6 +308,33 @@ const Dashboard = () => {
             console.error('Avatar update error:', err);
         } finally {
             setUpdatingAvatar(false);
+        }
+    };
+
+    const handleResetPassword = async (e) => {
+        e.preventDefault();
+        if (newPassword.length < 8) {
+            setPasswordError('Password must be at least 8 characters long.');
+            return;
+        }
+        if (newPassword !== confirmPassword) {
+            setPasswordError('Passwords do not match.');
+            return;
+        }
+        setUpdatingPassword(true);
+        setPasswordError('');
+        try {
+            const { error } = await supabase.auth.updateUser({ password: newPassword });
+            if (error) throw error;
+            sessionStorage.removeItem('isPasswordRecovery');
+            setRecoveryModalOpen(false);
+            setNewPassword('');
+            setConfirmPassword('');
+            alert('Password updated successfully!');
+        } catch (err) {
+            setPasswordError(err.message);
+        } finally {
+            setUpdatingPassword(false);
         }
     };
 
@@ -989,6 +1029,72 @@ const Dashboard = () => {
                                 Close
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Password Recovery / Reset Modal */}
+            {recoveryModalOpen && (
+                <div className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 2200 }}>
+                    <div className="glass-card no-hover p-4 p-md-5 m-3 text-center animate-fade-in" style={{ maxWidth: '500px', border: '1px solid rgba(255, 126, 95, 0.25)', borderRadius: '16px' }}>
+                        <div className="icon-circle mx-auto mb-4 bg-warning bg-opacity-25 text-warning animate-pulse" style={{ width: '80px', height: '80px', fontSize: '2.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+                            <i className="fas fa-key"></i>
+                        </div>
+                        <h3 className="mb-2 text-white fw-bold">Reset Your Password</h3>
+                        <p className="text-muted small mb-4">Please enter your new password below to update your account credentials.</p>
+                        
+                        {passwordError && <div className="alert alert-danger mb-3 py-2 text-start small">{passwordError}</div>}
+                        
+                        <form onSubmit={handleResetPassword}>
+                            <div className="mb-3 text-start">
+                                <label className="form-label text-light small fw-semibold">New Password</label>
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    required
+                                    placeholder="Min. 8 characters"
+                                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: 'white' }}
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                />
+                            </div>
+                            <div className="mb-4 text-start">
+                                <label className="form-label text-light small fw-semibold">Confirm Password</label>
+                                <input
+                                    type="password"
+                                    className="form-control"
+                                    required
+                                    placeholder="Re-enter new password"
+                                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.15)', color: 'white' }}
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                            </div>
+                            <div className="d-flex justify-content-end gap-3">
+                                <button 
+                                    type="button"
+                                    className="btn btn-outline-light px-4 py-2" 
+                                    onClick={() => {
+                                        sessionStorage.removeItem('isPasswordRecovery');
+                                        setRecoveryModalOpen(false);
+                                    }}
+                                    disabled={updatingPassword}
+                                >
+                                    Cancel
+                                </button>
+                                <button 
+                                    type="submit"
+                                    className="btn btn-gradient px-4 py-2"
+                                    disabled={updatingPassword}
+                                >
+                                    {updatingPassword ? (
+                                        <><span className="spinner-border spinner-border-sm me-2"></span> Updating...</>
+                                    ) : (
+                                        'Save Password'
+                                    )}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
