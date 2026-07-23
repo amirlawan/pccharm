@@ -202,15 +202,16 @@ const Home = () => {
 
             {/* Featured In / Partners Section */}
             <section className="featured-section">
-                <div className="container">
-                    <h5 data-aos="fade-up" className="text-center">Trusted By Leading Innovators & Educators</h5>
-                    <div className="partner-logos" data-aos="fade-up" data-aos-delay="100">
-                        <div className="partner-logo"><img src="/icon.png" alt="pccharm" style={{ height: '40px' }} /></div>
-                        <div className="partner-logo"><img src="/scda.png" alt="SCDA" style={{ height: '40px' }} /></div>
-                        <div className="partner-logo"><img src="https://via.placeholder.com/150x45/ffffff/a8b2d1?text=Partner+3" alt="Partner Logo 3" /></div>
-                        <div className="partner-logo"><img src="https://via.placeholder.com/150x45/ffffff/a8b2d1?text=Partner+4" alt="Partner Logo 4" /></div>
-                        <div className="partner-logo"><img src="https://via.placeholder.com/150x45/ffffff/a8b2d1?text=Partner+5" alt="Partner Logo 5" /></div>
+                <div className="container text-center">
+                    <h5 data-aos="fade-up" className="text-center text-uppercase text-muted small tracking-wider mb-3" style={{ letterSpacing: '2px' }}>In Partnership With</h5>
+                    <div className="partner-logos justify-content-center align-items-center gap-4" data-aos="fade-up" data-aos-delay="100">
+                        <div className="partner-logo p-2 d-flex align-items-center gap-2">
+                            <img src="/scda.png" alt="SCDA Partner" style={{ height: '45px', objectFit: 'contain' }} />
+                        </div>
                     </div>
+                    <p className="text-muted small mt-3 mb-0" data-aos="fade-up" data-aos-delay="200" style={{ fontSize: '0.85rem' }}>
+                        Partnership inquiries: <a href="mailto:partners@pccharm.site" className="text-info text-decoration-none fw-semibold">partners@pccharm.site</a>
+                    </p>
                 </div>
             </section>
 
@@ -421,40 +422,42 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Impact / Results Section */}
+            {/* Impact / Early Access Section */}
             <section id="impact" className="impact-section">
                 <div className="container">
                     <div className="row justify-content-center text-center mb-5">
                         <div className="col-lg-8">
-                            <span className="section-subtitle" data-aos="fade-up">Measurable Outcomes</span>
-                            <h2 className="section-title" data-aos="fade-up" data-aos-delay="100">Driving Tangible Results</h2>
-                            <p className="lead" data-aos="fade-up" data-aos-delay="200">We're committed to the success of our members and partners, demonstrated by real-world achievements.</p>
+                            <span className="section-subtitle" data-aos="fade-up">Early Access</span>
+                            <h2 className="section-title" data-aos="fade-up" data-aos-delay="100">Join Our Founding Cohort</h2>
+                            <p className="lead" data-aos="fade-up" data-aos-delay="200">
+                                Currently in early access — join the founding cohort shaping the future of practical tech education.
+                            </p>
                         </div>
                     </div>
-                    <div className="row text-center gy-4">
+                    <div className="row text-center gy-4 justify-content-center">
                         <div className="col-md-4" data-aos="fade-up" data-aos-delay="300">
                             <div className="stat-item">
-                                <span className="stat-number counter-k" data-count="10">0</span>
-                                <span className="stat-label d-block">Successful Learners</span>
+                                <span className="stat-number counter" data-count="25" data-suffix-after="true">0</span>
+                                <span className="stat-label d-block">Interactive Courses & Tracks</span>
                             </div>
                         </div>
                         <div className="col-md-4" data-aos="fade-up" data-aos-delay="400">
                             <div className="stat-item">
-                                <span className="stat-number counter" data-count="92" data-suffix="%">0%</span>
-                                <span className="stat-label d-block">Job Placement Rate</span>
+                                <span className="stat-number counter" data-count="100" data-suffix="%">0%</span>
+                                <span className="stat-label d-block">Hands-On Practical Learning</span>
                             </div>
                         </div>
                         <div className="col-md-4" data-aos="fade-up" data-aos-delay="500">
                             <div className="stat-item">
-                                <span className="stat-number counter" data-count="500" data-suffix-after="true">0</span>
-                                <span className="stat-label d-block">Projects Launched</span>
+                                <span className="stat-number text-teal">Early Access</span>
+                                <span className="stat-label d-block">Founding Member Cohort</span>
                             </div>
                         </div>
                     </div>
-                    <div className="case-study-highlight text-center" data-aos="fade-up" data-aos-delay="600">
-                        <h5>Featured Success: Project Phoenix</h5>
-                        <p className="mt-3">PcCharm Academy graduates collaborated via Connect to build an AI-powered threat detection system, now being piloted by our industry partners.</p>
-                        <a href="#" className="btn btn-sm btn-outline-light mt-2">Read Case Study</a>
+                    <div className="case-study-highlight text-center mt-5" data-aos="fade-up" data-aos-delay="600">
+                        <h5>Founding Vision</h5>
+                        <p className="mt-3">We are actively refining our curriculum in Web Development, Cybersecurity, and AI with our initial cohort of early members.</p>
+                        <Link to="/signup" className="btn btn-sm btn-gradient text-white mt-2">Join Founding Cohort</Link>
                     </div>
                 </div>
             </section>
@@ -499,72 +502,53 @@ const Home = () => {
             <section id="community" className="bg-primary-dark">
                 <div className="container text-center">
                     <span className="section-subtitle" data-aos="fade-up">Global Network</span>
-                    <h2 className="mb-4 section-title" data-aos="fade-up" data-aos-delay="100">Join a Thriving Community of Innovators</h2>
-                    <p className="mb-4 lead" data-aos="fade-up" data-aos-delay="200">Connect, collaborate, learn, and grow with thousands of peers, mentors, and industry experts worldwide.</p>
-                    <div className="community-count" id="communityCount" data-aos="fade-up" data-aos-delay="300">0</div>
-                    <p className="mb-5" data-aos="fade-up" data-aos-delay="400">Members Across 37+ Countries & Growing!</p>
-                    <div className="avatar-grid" data-aos="fade-up" data-aos-delay="500">
-                        <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 1" className="community-avatar" />
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 2" className="community-avatar" />
-                        <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 3" className="community-avatar" />
-                        <img src="https://images.unsplash.com/photo-1485178575877-1a13bf489dfe?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 4" className="community-avatar" />
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 5" className="community-avatar" />
-                        <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 6" className="community-avatar" />
-                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c7da?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 7" className="community-avatar" />
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=80&h=80&q=80" alt="Avatar 8" className="community-avatar" />
-                    </div>
-                    <div className="mt-5" data-aos="fade-up" data-aos-delay="600">
-                        <a href="#" className="btn btn-gradient text-white">Explore Community Hub</a>
+                    <h2 className="mb-4 section-title" data-aos="fade-up" data-aos-delay="100">Join the PcCharm Founding Cohort</h2>
+                    <p className="mb-4 lead" data-aos="fade-up" data-aos-delay="200">Connect, collaborate, learn, and grow with early adopters, mentors, and fellow tech enthusiasts.</p>
+                    <div className="community-count text-teal" data-aos="fade-up" data-aos-delay="300" style={{ fontSize: '2.5rem', fontWeight: 700 }}>Early Access</div>
+                    <p className="mb-4" data-aos="fade-up" data-aos-delay="400">Be among the founding members shaping our upcoming AI Forge & SecLab features!</p>
+                    <div className="mt-4" data-aos="fade-up" data-aos-delay="500">
+                        <Link to="/connect" className="btn btn-gradient text-white">Join PcCharm Connect</Link>
                     </div>
                 </div>
             </section>
 
-            {/* Testimonials Section */}
-            <section id="testimonials" className="testimonials-section bg-darker">
+            {/* Founder's Mission / Story Section */}
+            <section id="mission" className="testimonials-section bg-darker">
                 <div className="container">
-                    <div className="row justify-content-center text-center mb-5">
-                        <div className="col-lg-8">
-                            <span className="section-subtitle" data-aos="fade-up">Success Stories</span>
-                            <h2 className="section-title" data-aos="fade-up" data-aos-delay="100">Hear From Our Members</h2>
-                        </div>
-                    </div>
-                    <div className="row g-4">
-                        <div className="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="200">
-                            <div className="glass-card testimonial-card w-100">
-                                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=100&h=100&q=80" alt="Jane Doe" className="testimonial-avatar" />
-                                <div className="testimonial-text">
-                                    <p>"PcCharm didn't just teach me code; it taught me how to think like an engineer. The integrated labs and community projects were invaluable."</p>
+                    <div className="row justify-content-center">
+                        <div className="col-lg-10">
+                            <div className="glass-card p-4 p-md-5 position-relative overflow-hidden" data-aos="fade-up" style={{ borderColor: 'rgba(0, 242, 254, 0.3)' }}>
+                                <div className="position-absolute top-0 end-0 m-4 opacity-10 d-none d-md-block">
+                                    <i className="fas fa-quote-right fa-7x text-info"></i>
                                 </div>
-                                <div className="testimonial-author">Jane Doe</div>
-                                <div className="testimonial-role">Software Engineer @ TechCorp</div>
-                                <div className="testimonial-rating">
-                                    <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i>
+                                <span className="section-subtitle text-uppercase text-info mb-2 d-block" style={{ letterSpacing: '2px' }}>Our Mission & Story</span>
+                                <h2 className="section-title text-white mb-4">Why We Are Building PcCharm</h2>
+                                
+                                <div className="mission-content text-light lead fs-5 lh-lg mb-4">
+                                    <p className="mb-3">
+                                        "PcCharm was built because we saw the gap between theoretical education and real-world tech skills."
+                                    </p>
+                                    <p className="mb-3" style={{ fontSize: '1.05rem', color: '#a8b2d1' }}>
+                                        We set out to create an integrated ecosystem where learners, developers, and cybersecurity enthusiasts don't just consume content — they build real projects, test skills in interactive sandboxes, and collaborate with a global network of peers.
+                                    </p>
+                                    <p className="mb-0" style={{ fontSize: '1.05rem', color: '#a8b2d1' }}>
+                                        Currently in early access, we are working closely with our founding cohort to deliver a world-class tech learning experience.
+                                    </p>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="300">
-                            <div className="glass-card testimonial-card w-100">
-                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80" alt="John Smith" className="testimonial-avatar" />
-                                <div className="testimonial-text">
-                                    <p>"The SecLab simulations are incredibly realistic. I landed my dream cybersecurity job thanks to the hands-on skills I gained here."</p>
-                                </div>
-                                <div className="testimonial-author">John Smith</div>
-                                <div className="testimonial-role">Cybersecurity Analyst</div>
-                                <div className="testimonial-rating">
-                                    <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star-half-alt"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="400">
-                            <div className="glass-card testimonial-card w-100">
-                                <img src="https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?auto=format&fit=crop&w=100&h=100&q=80" alt="Alex Lee" className="testimonial-avatar" />
-                                <div className="testimonial-text">
-                                    <p>"AI Forge provided the tools and structure I needed to take my AI concepts from idea to deployed model. The mentorship was outstanding."</p>
-                                </div>
-                                <div className="testimonial-author">Alex Lee</div>
-                                <div className="testimonial-role">Founder, AI Startup</div>
-                                <div className="testimonial-rating">
-                                    <i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i><i className="fas fa-star"></i>
+
+                                <div className="d-flex flex-wrap align-items-center justify-content-between pt-4 border-top border-secondary border-opacity-25 mt-4 gap-3">
+                                    <div className="d-flex align-items-center">
+                                        <div className="bg-info bg-opacity-25 rounded-circle p-3 d-flex align-items-center justify-content-center me-3 border border-info border-opacity-50" style={{ width: '52px', height: '52px' }}>
+                                            <i className="fas fa-user-shield fs-4 text-info"></i>
+                                        </div>
+                                        <div>
+                                            <div className="fw-bold text-white fs-5">PcCharm Team</div>
+                                            <div className="text-info small">Engineering & Platform Vision</div>
+                                        </div>
+                                    </div>
+                                    <Link to="/signup" className="btn btn-outline-info rounded-pill px-4 py-2">
+                                        Join Early Access <i className="fas fa-arrow-right ms-2"></i>
+                                    </Link>
                                 </div>
                             </div>
                         </div>
